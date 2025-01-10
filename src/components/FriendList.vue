@@ -29,7 +29,7 @@ onMounted(() => {
 	})
 	// ws连接
 	connectWebsocket(
-			`ws://${host}/${import.meta.env.VITE_WS_PATH}chat`,
+			`ws://${host}${import.meta.env.VITE_WS_PATH}chat?token=${useUserStoreHook().token}`,
 			// "ws://localhost:9001/chat",
 			{content: 'user1'},
 			(data: string) => {

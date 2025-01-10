@@ -10,10 +10,11 @@ let sendDatas = {};
 
 export const connectWebsocket = (url: string, agentData: {}, successCallback: Callback, errCallback: Callback) => {
     // 上次使用未关闭，创建前关闭下
-    if (wsObj) {
-        closeWebSocket()
-    }
+    // if (wsObj) {
+    //     closeWebSocket()
+    // }
     wsUrl = url
+    console.log("ws url: ", url)
     createWebSocket()
     messageCallback = successCallback
     errCallback = errCallback

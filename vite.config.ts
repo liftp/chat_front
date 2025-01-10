@@ -32,7 +32,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           target: "ws://localhost:7891/",
           ws: true,
           /** 替换掉代理路径  */
-          rewrite: path => path.replace(/^\/api\/v1\/ws\//, ''),
+          rewrite: path => path.replace(/^\/api\/v1\/ws\//, '/'),
           /** 是否允许跨域 */
           changeOrigin: true
         },
