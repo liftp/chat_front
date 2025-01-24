@@ -6,7 +6,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { FriendList } from '@/db/model/models';
+import { ChatRecord, FriendList } from '@/db/model/models';
 // import { getCookie } from '@/util/cache/cookies';
 import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user';
 import { onMounted, onUnmounted, Ref, ref, watchEffect } from 'vue';
@@ -23,8 +23,8 @@ onMounted(() => {
 	window.electronApi.findFriend('', useUserStoreHook().userId)
 	.then(freindList => {
 		freindList.forEach(friend => {
-		console.log(friend)
-		friendsLocal.value.push(friend)
+			console.log(friend)
+			friendsLocal.value.push(friend)
 		})
 	})
 	// ws连接
@@ -34,6 +34,10 @@ onMounted(() => {
 			{content: 'user1'},
 			(data: string) => {
 				console.log('返回的数据：', data)
+				// 写入local db
+				const msg: ChatRecord = JSON.parse(data)
+				msg.saveType = "1";
+				window.electronApi.writeMsg(msg)
 			},
 			(err: string) => {
 				console.log('失败回调：', err)

@@ -5,7 +5,7 @@ import process from 'process'
 import { fileURLToPath } from 'url'
 
 // 预加载ESM模块
-import {readRecord, countRecord} from '../src/db/service/ChatRecordService'
+import {readRecord, countRecord, saveRecord} from '../src/db/service/ChatRecordService'
 import {findFriend} from '../src/db/service/FriendListService'
 import { ChatRecord } from '../src/db/model/models'
 // import('./preload/preload.mjs')
@@ -56,6 +56,9 @@ app.whenReady().then(() => {
   })  
   ipcMain.handle('find-friend', async (event, name, selfId) => {
     return await findFriend(name, selfId);
+  })
+  ipcMain.handle('write-msg', async (event, msg: ChatRecord) => {
+    await saveRecord(msg);
   })
   createWindow()
   app.on('activate', function () {
