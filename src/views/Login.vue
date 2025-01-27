@@ -36,7 +36,7 @@ const rules = reactive<FormRules<typeof loginForm>> ({
 
 const submitForm = (formEl: FormInstance | undefined) => {
     if (!formEl) return 
-    formEl.validate((valid) => {
+    formEl.validate((valid:boolean) => {
         if (valid) {
             useUserStoreHook()
                 .login(loginForm)

@@ -4,7 +4,7 @@
                 <el-main>
                     <div id="chatBox" ref="msg_arr" class="chat-msg-box" @scroll="scroll_msg_box">
                             <div id="item" v-for="(line, index) in chatRecords" :key="index" style="margin-top: 10px;">
-                                {{line}}
+                                {{line.content}}
                             </div>
                     </div>
                 </el-main>
@@ -20,6 +20,7 @@
                             class="margin-right: 5px"
                             text
                             bg
+                            @click="sendMsg"
                         >
                             发送
                         </el-button>
@@ -29,12 +30,13 @@
 </template>
 
 <script lang="ts" setup>
-import {watchEffect, ref, Ref} from 'vue'
+import {watchEffect, ref, Ref, onUnmounted, onMounted} from 'vue'
 import { useCurrentChatHook } from '@/store/modules/user'
+import emitter from '@/util/emitter'
+import { ChatRecord } from '@/db/model/models'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
-const chatRecords: Ref<string[]> = ref([])
-
+const chatRecords: Ref<ChatRecord[]> = ref([])
 
 
 const host = window.location.host;
@@ -50,7 +52,7 @@ watchEffect(() => {
             window.electronApi.readRecord( 0, count > (page * size) ? page * size : count, useCurrentChatHook().chatUserId)
                 .then((records_text) => {
                     records_text.forEach((text, _) => {
-                        chatRecords.value.push(text.content)
+                        chatRecords.value.push(text)
                         // page = 2;
                         // console.log(chatRecords.value)
                     })
@@ -65,6 +67,29 @@ function scroll_msg_box() {
         // 加载数据
         console.log("sdas")
     }
+}
+
+const addMsgEventType = 'addMsgInLocal'
+onMounted(() => {
+    emitter.on(addMsgEventType, (val) => {
+        chatRecords.value.push(val as ChatRecord)
+    })
+})
+
+
+onUnmounted(() => {
+    emitter.off(addMsgEventType)
+})
+
+function sendMsg() {
+    // write record in local 
+    const sendUserId = useCurrentChatHook().chatUserId
+    const record: ChatRecord = {saveType: "1", sendUserId: -1, receiveUserId: sendUserId, friendId: sendUserId, content: inputText.value};
+    window.electronApi.writeMsg(record)
+    // send msg to server 
+    emitter.emit("sendWsMsg", record)
+    // record to add current chat window
+    chatRecords.value.push(record)
 }
 
 </script>

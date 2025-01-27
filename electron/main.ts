@@ -38,7 +38,7 @@ function createWindow () {
   })
   // 加载 index.html
 //   mainWindow.loadFile('./index.html') // 新增
-mainWindow.loadURL('http://localhost:3333')//根据vue url更改
+mainWindow.loadURL(`http://localhost:${process.env.PORT}`)//根据vue url更改
 
   // 打开开发工具
   mainWindow.webContents.openDevTools()

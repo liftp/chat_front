@@ -31,6 +31,14 @@ export const closeWebSocket = () => {
     }
 }
 
+export const sendWsMsg = (msg: any) => {
+    if (wsObj.readyState === wsObj.OPEN) {
+        wsObj.send(JSON.stringify(sendDatas))
+    } else {
+        console.log("连接异常")
+    }
+}
+
 const createWebSocket = () => {
     if (typeof (WebSocket) === 'undefined') {
         // writeToScreen("浏览器不支持WebSocket, 无法获取数据")

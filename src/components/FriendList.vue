@@ -10,43 +10,52 @@ import { ChatRecord, FriendList } from '@/db/model/models';
 // import { getCookie } from '@/util/cache/cookies';
 import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user';
 import { onMounted, onUnmounted, Ref, ref, watchEffect } from 'vue';
-import {connectWebsocket, closeWebSocket} from '../ws/WebSocketServer'
-
+import {connectWebsocket, closeWebSocket, sendWsMsg} from '../ws/WebSocketServer'
+import emitter from '@/util/emitter';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const host = window.location.host;
-  
+const sendWsMsgEventType = "sendWsMsg"  
 
 // 先从本地加载好友列表
 onMounted(() => {
 	// 加载当前好友的
 	window.electronApi.findFriend('', useUserStoreHook().userId)
-	.then(freindList => {
-		freindList.forEach(friend => {
-			console.log(friend)
-			friendsLocal.value.push(friend)
+		.then(freindList => {
+			freindList.forEach(friend => {
+				console.log(friend)
+				friendsLocal.value.push(friend)
+			})
 		})
-	})
 	// ws连接
 	connectWebsocket(
 			`ws://${host}${import.meta.env.VITE_WS_PATH}chat?token=${useUserStoreHook().token}`,
 			// "ws://localhost:9001/chat",
-			{content: 'user1'},
+			{msgType: 1},
 			(data: string) => {
 				console.log('返回的数据：', data)
 				// 写入local db
 				const msg: ChatRecord = JSON.parse(data)
 				msg.saveType = "1";
 				window.electronApi.writeMsg(msg)
+				emitter.emit('addMsgInLocal', msg)
 			},
 			(err: string) => {
 				console.log('失败回调：', err)
 			}
 		)
+	// emitter on 
+	emitter.on(sendWsMsgEventType, (val) => {
+		sendWsMsg(val) 
+    })
+	
 })
 
 onUnmounted(() => {
     closeWebSocket()
+
+	// emitter off 
+	emitter.off(sendWsMsgEventType)
 })
 
 
