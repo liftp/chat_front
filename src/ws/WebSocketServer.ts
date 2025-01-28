@@ -33,7 +33,8 @@ export const closeWebSocket = () => {
 
 export const sendWsMsg = (msg: any) => {
     if (wsObj.readyState === wsObj.OPEN) {
-        wsObj.send(JSON.stringify(sendDatas))
+        console.log(msg)
+        wsObj.send(JSON.stringify(msg))
     } else {
         console.log("连接异常")
     }
@@ -162,8 +163,10 @@ let heartCheck = {
             }
         },3000)
         console.log("内嵌定时器this.serverTimeoutObj:", this.serverTimeoutObj)
-        this.serverTimeoutObj = +setTimeout(() => {
-            reconnect();
-        }, this.timeout)
+        if (wsObj.readyState != wsObj.OPEN) {
+            this.serverTimeoutObj = +setTimeout(() => {
+                reconnect();
+            }, this.timeout)
+        }
     }
 }

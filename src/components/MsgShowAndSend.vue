@@ -85,11 +85,14 @@ function sendMsg() {
     // write record in local 
     const sendUserId = useCurrentChatHook().chatUserId
     const record: ChatRecord = {saveType: "1", sendUserId: -1, receiveUserId: sendUserId, friendId: sendUserId, content: inputText.value};
+    console.log(record)
     window.electronApi.writeMsg(record)
     // send msg to server 
-    emitter.emit("sendWsMsg", record)
+    emitter.emit("sendWsMsg", {...record, msgType: 2})
     // record to add current chat window
     chatRecords.value.push(record)
+    // clear msg window
+    inputText.value = ""
 }
 
 </script>
