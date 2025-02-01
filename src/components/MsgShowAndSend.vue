@@ -47,7 +47,6 @@ const currentUserId:number =  useUserStoreHook().userId;
 
 
 const host = window.location.host;
-let page = 1
 const size = 20
 const maxLine = 0
 let startDateTime = -1
@@ -89,9 +88,6 @@ function scroll_msg_box() {
     let scrollTop = document.getElementById("chatBox")?.scrollTop;
     if (scrollTop == 0) {
         // 加载数据
-        if (page > 0) {
-            page --
-        }
         upglide()
     }
 }
