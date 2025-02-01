@@ -1,6 +1,6 @@
 import Datastore from 'nedb'
 import { ChatRecord, FriendList } from './model/models'
-import {formaData} from '../script/DateUtil'
+import {formatDate} from '../script/DateUtil'
 
 export const db: Datastore<ChatRecord> = new Datastore<ChatRecord>({
     filename: './chatDB.db',

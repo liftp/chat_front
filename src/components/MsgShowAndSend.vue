@@ -38,7 +38,8 @@
 import {watchEffect, ref, Ref, onUnmounted, onMounted} from 'vue'
 import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user'
 import emitter from '@/util/emitter'
-import { ChatRecord } from '@/db/model/models'
+import { ChatRecord, ChatRecordSearch } from '@/db/model/models'
+import {formatDate} from '@/script/DateUtil'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
@@ -47,31 +48,51 @@ const currentUserId:number =  useUserStoreHook().userId;
 
 const host = window.location.host;
 let page = 1
-const size = 5
+const size = 20
 const maxLine = 0
+let startDateTime = -1
 watchEffect(() => {
+    upglide()
+})
+
+/**
+ * 上滑滚动条，查询历史聊天记录
+ * 基本分页逻辑：根据聊天记录时间戳倒序排，然后根据页面展示的最早一条的开始时间戳作为开始时间，往前查找size数量
+ * 对应nedb中{dateTime:{$lt:startDateTime}},这里每次添加数据记录最早一条的时间戳，即startDateTime变量
+ */
+function upglide() {
     if (useCurrentChatHook().chatUserId != -1) {
-        chatRecords.value = []
         // fileNoExistToCreate(recordPath)
-        window.electronApi.recordCount().then((count) => {
+        // 按照好友id, 聊天记录所属当前用户，搜索对应的聊天记录 
+        const search:ChatRecordSearch = {friendId: useCurrentChatHook().chatUserId, selfId: currentUserId}
+        window.electronApi.recordCount(search).then((count) => {
             console.log("friendId", useCurrentChatHook().chatUserId)
-            window.electronApi.readRecord( 0, count > (page * size) ? page * size : count, useCurrentChatHook().chatUserId)
+            // 聊天记录的时间戳，往前查询固定条数
+            window.electronApi.readRecord(startDateTime, size, search)
                 .then((records_text) => {
                     records_text.forEach((text, _) => {
-                        chatRecords.value.push(text)
+                        if (text.dateTime != undefined) {
+                            startDateTime = text.dateTime;
+                        }
+                        // 每次往数组首位添加
+                        chatRecords.value.unshift(text)
                         // page = 2;
                         // console.log(chatRecords.value)
+                        // console.log(count)
                     })
                 })
         })
     }
-})
+}
 
 function scroll_msg_box() {
     let scrollTop = document.getElementById("chatBox")?.scrollTop;
     if (scrollTop == 0) {
         // 加载数据
-        console.log("sdas")
+        if (page > 0) {
+            page --
+        }
+        upglide()
     }
 }
 
@@ -90,9 +111,11 @@ onUnmounted(() => {
 function sendMsg() {
     // write record in local 
     const receiveUserId = useCurrentChatHook().chatUserId
-    const record: ChatRecord = {saveType: "1", sendUserId: currentUserId, receiveUserId: receiveUserId, friendId: receiveUserId, content: inputText.value};
+    const dateTime = new Date()
+    const createdAt = formatDate(dateTime)
+    const record: ChatRecord = {saveType: "1", sendUserId: currentUserId, receiveUserId: receiveUserId, friendId: receiveUserId, content: inputText.value, dateTime: dateTime.getTime(), createdAt};
     console.log(record)
-    window.electronApi.writeMsg({...record, selfId: receiveUserId})
+    window.electronApi.writeMsg({...record, selfId: currentUserId})
     // send msg to server 
     emitter.emit("sendWsMsg", {...record, msgType: 2})
     // record to add current chat window

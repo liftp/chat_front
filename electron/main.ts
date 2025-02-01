@@ -48,11 +48,11 @@ mainWindow.loadURL(`http://localhost:${process.env.PORT}`)//根据vue url更改
 // 和创建浏览器窗口的时候调用
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(() => {
-  ipcMain.handle('read-record', async (event, start, end, friendId) => {
-    return await readRecord(start, end, {friendId});
+  ipcMain.handle('read-record', async (event, start, end, search) => {
+    return await readRecord(start, end, search);
   })
-  ipcMain.handle('record-count', async (event) => {
-    return await countRecord();
+  ipcMain.handle('record-count', async (event, search) => {
+    return await countRecord(search);
   })  
   ipcMain.handle('find-friend', async (event, name, selfId) => {
     return await findFriend(name, selfId);

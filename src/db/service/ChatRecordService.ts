@@ -10,8 +10,11 @@ import {db} from '../NeDB'
 // class ChatRecordServiceImpl implements ChatRecordService {
     export const readRecord = ( start: number, end: number, search?: any) =>  {
         return new Promise<ChatRecord[]>((resolve, reject) => {
-            db.find<ChatRecord>({saveType:'1', ...search}).sort({createdAt: -1})
-                .skip(start).limit(end - start).exec((err, docs) => {
+            if (start != -1) {
+                search.dateTime = {$lt: start}
+            }
+            db.find<ChatRecord>({saveType:'1', ...search}).sort({dateTime: -1})
+                .skip(0).limit(end).exec((err, docs) => {
                     if (err != null) {
                         reject(err)
                     }
@@ -36,7 +39,8 @@ import {db} from '../NeDB'
     };
     export const countRecord = (search?: ChatRecord) => {
         return new Promise<number>((resolve, reject) => {
-            db.count({...search}, (err, docsNum) => {
+            console.log("count search:", search)
+            db.count({saveType:'1', ...search}, (err, docsNum) => {
                 if (err != null) {
                     reject(err)
                 }

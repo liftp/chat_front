@@ -1,6 +1,6 @@
 
 // 定义格式化封装函数
-export const formaData = function(timer: Date) {
+export const formatDate = function(timer: Date) {
         const year = timer.getFullYear()
         const month = timer.getMonth() + 1 // 由于月份从0开始，因此需加1
         const day = timer.getDate()

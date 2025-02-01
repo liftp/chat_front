@@ -37,6 +37,8 @@ onMounted(() => {
 				// 写入local db
 				const msg: ChatRecord = JSON.parse(data)
 				msg.saveType = "1";
+				// 服务器的消息的friendId没有处理，是接收人（相对于发送人的好友而言），这里转换为发送人
+				msg.friendId = msg.sendUserId;
 				msg.selfId = useUserStoreHook().userId;
 				window.electronApi.writeMsg(msg)
 				emitter.emit('addMsgInLocal', msg)
