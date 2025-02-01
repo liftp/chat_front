@@ -13,7 +13,7 @@ import {db} from '../NeDB'
             if (start != -1) {
                 search.dateTime = {$lt: start}
             }
-            db.find<ChatRecord>({saveType:'1', ...search}).sort({dateTime: -1})
+            db.find<ChatRecord>({...search}).sort({dateTime: -1})
                 .skip(0).limit(end).exec((err, docs) => {
                     if (err != null) {
                         reject(err)

@@ -12,6 +12,7 @@ import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user';
 import { onMounted, onUnmounted, Ref, ref, watchEffect } from 'vue';
 import {connectWebsocket, closeWebSocket, sendWsMsg} from '../ws/WebSocketServer'
 import emitter from '@/util/emitter';
+import { selectNotReadMsg } from '@/api/msg';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const host = window.location.host;
@@ -19,14 +20,6 @@ const sendWsMsgEventType = "sendWsMsg"
 
 // 先从本地加载好友列表
 onMounted(() => {
-	// 加载当前好友的
-	window.electronApi.findFriend('', useUserStoreHook().userId)
-		.then(freindList => {
-			freindList.forEach(friend => {
-				console.log(friend)
-				friendsLocal.value.push(friend)
-			})
-		})
 	// ws连接
 	connectWebsocket(
 			`ws://${host}${import.meta.env.VITE_WS_PATH}chat?token=${useUserStoreHook().token}`,
@@ -51,6 +44,26 @@ onMounted(() => {
 	emitter.on(sendWsMsgEventType, (val) => {
 		sendWsMsg(val) 
     })
+	// 拉取未读消息,应该同步于消息展示之前(加载好友列表之前即可)
+	selectNotReadMsg()
+		.then((docs) => {
+			if (docs != null && docs.data != null) {
+				docs.data.forEach(element => {
+					element.selfId = element.receiveUserId
+					element.friendId = element.sendUserId
+					element.dateTime = Number(element.dateTime)
+					window.electronApi.writeMsg(element)
+				});
+			}
+			// 加载本地好友列表
+			window.electronApi.findFriend('', useUserStoreHook().userId)
+				.then(freindList => {
+					freindList.forEach(friend => {
+						console.log(friend)
+						friendsLocal.value.push(friend)
+					})
+				})
+		})
 	
 })
 
