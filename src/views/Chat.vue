@@ -49,7 +49,7 @@
 
 .chat-left {
     /* margin-left: 0px; */
-    background-color: #eef0f4;
+    background-color: #cfcfcf;
     border: 1px solid #e4e7ed;
     width: 30%;
     border-radius: 4px;
@@ -58,52 +58,19 @@
     width: 70%;
     border: 1px solid #e4e7ed;
     border-radius: 4px;
-    background-color: #f3f7ff;
+    background-color: #cfcfcf;
     height: 100vh;
 
 }
-.chat-msg-box {
-    /* height: 100%; */
-    width: auto;
-    
-    overflow: auto;
-    
-}
+
 .el-main {
     padding-left: 10px;
     display: flex;
 }
-.chat-msg-box div {
-    text-align: left;
-}
+
 
 .chat-input {
     /* background-color: #f3f7ff;
     min-height: 100px; */
-}
-
-#item {
-    position: relative;
-    width: fit-content;
-    min-height: 20px;
-    background: white;
-    border-radius: 5px;
-    line-height: normal;
-    margin-left: 10px;
-    word-break: break-word;
-    color: black;
-    padding: 5px;
-    line-height: 18px;
-}
-#item::after {
-    content: "";
-    display: block;
-    position: absolute;
-    width: 0;
-    height: 0;
-    border: 8px solid transparent;
-    border-right-color: white;
-    top: 13px;
-    left: -13px;
 }
 </style>

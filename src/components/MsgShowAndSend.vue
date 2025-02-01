@@ -3,8 +3,13 @@
         <el-container style="height: 78dvh;">
                 <el-main>
                     <div id="chatBox" ref="msg_arr" class="chat-msg-box" @scroll="scroll_msg_box">
-                            <div id="item" v-for="(line, index) in chatRecords" :key="index" style="margin-top: 10px;">
-                                {{line.content}}
+                            <div  v-for="(line, index) in chatRecords" :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'" :key="index" style="margin-top: 10px;">
+                                <template v-if="line.sendUserId !== currentUserId">
+                                    <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
+                                </template>
+                                <template v-if="line.sendUserId === currentUserId">
+                                    <div class="item item-right-child">{{line.content}}</div><div class="bubble-triangle bubble-triangle-left"></div>
+                                </template>
                             </div>
                     </div>
                 </el-main>
@@ -31,12 +36,13 @@
 
 <script lang="ts" setup>
 import {watchEffect, ref, Ref, onUnmounted, onMounted} from 'vue'
-import { useCurrentChatHook } from '@/store/modules/user'
+import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user'
 import emitter from '@/util/emitter'
 import { ChatRecord } from '@/db/model/models'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
+const currentUserId:number =  useUserStoreHook().userId;
 
 
 const host = window.location.host;
@@ -86,7 +92,7 @@ function sendMsg() {
     const sendUserId = useCurrentChatHook().chatUserId
     const record: ChatRecord = {saveType: "1", sendUserId: -1, receiveUserId: sendUserId, friendId: sendUserId, content: inputText.value};
     console.log(record)
-    window.electronApi.writeMsg(record)
+    window.electronApi.writeMsg({...record, selfId: sendUserId})
     // send msg to server 
     emitter.emit("sendWsMsg", {...record, msgType: 2})
     // record to add current chat window
@@ -100,10 +106,11 @@ function sendMsg() {
 <style>
 .chat-msg-box {
     /* height: 100%; */
-    width: auto;
-    
+    width: 100%;
     overflow: auto;
-    
+    /* display: flex; */
+    /* flex-direction: column; */
+    /* align-items: flex-end; */
 }
 .el-main {
     padding-left: 10px;
@@ -117,29 +124,60 @@ function sendMsg() {
     /* background-color: #f3f7ff;
     min-height: 100px; */
 }
+.item-left {
+    display: flex;
+    justify-content: flex-start;
+}
+.item-right {
+    display: flex;
+    justify-content: flex-end;
+}
 
-#item {
+
+.item {
     position: relative;
     width: fit-content;
     min-height: 20px;
-    background: white;
     border-radius: 5px;
     line-height: normal;
-    margin-left: 10px;
     word-break: break-word;
     color: black;
     padding: 5px;
     line-height: 18px;
 }
-#item::after {
+
+.item-left-child {
+    background-color: white;
+}
+
+.item-right-child {
+    background-color: rgb(0, 200, 0);
+}
+
+
+.bubble-triangle {
     content: "";
     display: block;
-    position: absolute;
+    position: relative;
     width: 0;
     height: 0;
     border: 8px solid transparent;
-    border-right-color: white;
     top: 13px;
-    left: -13px;
 }
+
+/* 气泡右三角 */
+.bubble-triangle-right  {
+    border-right-color: white;
+    left: 3px;
+}
+
+
+/* 气泡左三角 */
+.bubble-triangle-left {
+    border-left-color: rgb(0, 200, 0);
+    left: -3px;
+}
+
+
+
 </style>

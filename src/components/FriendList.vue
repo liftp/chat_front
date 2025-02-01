@@ -37,6 +37,7 @@ onMounted(() => {
 				// 写入local db
 				const msg: ChatRecord = JSON.parse(data)
 				msg.saveType = "1";
+				msg.selfId = useUserStoreHook().userId;
 				window.electronApi.writeMsg(msg)
 				emitter.emit('addMsgInLocal', msg)
 			},

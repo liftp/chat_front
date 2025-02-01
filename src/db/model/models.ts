@@ -6,6 +6,7 @@ export interface ChatRecord {
     content: string,
     createdAt?: string,
     friendId: number,
+    selfId?: number, // 消息所属
 }
 
 export interface ChatRecordSearch {
@@ -16,6 +17,7 @@ export interface ChatRecordSearch {
     content: string,
     createdAt: string,
     friendId: number,
+    selfId: number, // 消息所属
 }
 
 export interface FriendList {
