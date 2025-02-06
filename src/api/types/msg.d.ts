@@ -6,6 +6,7 @@ export interface ChatServerMsgRecord {
     content: string,
     createdAt?: string,
     friendId: number,
+    chatType: number,
     selfId?: number, // 消息所属
     dateTime?: number, // 时间戳用于排序
 }

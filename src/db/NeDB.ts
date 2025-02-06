@@ -47,6 +47,7 @@ export const dbFreinds: Datastore<FriendList> = new Datastore<FriendList>({
 // dbFreinds.remove({}, {multi: true}, (err, num) => {
 //     console.log("delete num:", num)
 // });
-// dbFreinds.insert({friendId: 2, friendName:"lisi", friendRemark: "李四", selfId: 1})
-// dbFreinds.insert({friendId: 1, friendName:"zs", friendRemark: "张三", selfId: 2})
-// dbFreinds.insert({friendId: 3, friendName:"wangwu", friendRemark: "王五", selfId: 2})
+// dbFreinds.insert({friendId: 2, friendName:"lisi", friendRemark: "李四", selfId: 1, type: 1})
+// dbFreinds.insert({friendId: 1, friendName:"zs", friendRemark: "张三", selfId: 2, type: 1})
+// dbFreinds.insert({friendId: 3, friendName:"wangwu", friendRemark: "王五", selfId: 2, type: 1})
+// dbFreinds.insert({friendId: 4, friendName:"多人群聊", friendRemark: "开放群聊", selfId: 1, type: 2})

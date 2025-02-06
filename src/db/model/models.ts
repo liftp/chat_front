@@ -8,6 +8,7 @@ export interface ChatRecord {
     friendId: number,
     selfId?: number, // 消息所属
     dateTime?: number, // 时间戳用于排序
+    chatType: number, // 1:单聊 2:群聊
 }
 
 export interface ChatRecordSearch {
@@ -19,11 +20,14 @@ export interface ChatRecordSearch {
     createdAt?: string,
     friendId?: number,
     selfId?: number, // 消息所属
+    chatType: number, // 1:单聊 2:群聊
 }
 
 export interface FriendList {
-    friendId: number,
-    friendName: string,
-    friendRemark: string,
+    friendId: number,       // type:2,群组id
+    friendName: string,     // type:2,群组名称
+    friendRemark: string,   // type:2,群组备注
+    type: number, // 类型 1:普通好友聊天 2:群聊
+    // groupStatus: number, // 群状态： 0:开放 1:成员邀请加入 2:仅所属人拉取 3:密码进入
     selfId: number,
 }

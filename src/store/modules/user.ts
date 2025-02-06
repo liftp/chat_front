@@ -61,11 +61,15 @@ export function useUserStoreHook() {
 
 // 当前聊天展示用户
 const useCurrentChat = defineStore("currentChat", () => {
-    const chatUserId = ref<number>(-1);
+    const chatUserId = ref<number>(-1); // 聊天用户 chatType:1,为好友id, chatType:2,为群聊ID
+    const chatType = ref<number>(1) // 1：单聊 2：群聊
     const choiceUserChat = (userId: number) => {
         chatUserId.value = userId
     }
-    return {chatUserId, choiceUserChat}
+    const setChatType = (type: number) => {
+        chatType.value = type
+    }
+    return {chatUserId, chatType, choiceUserChat, setChatType}
 })
 export function useCurrentChatHook() {
     return useCurrentChat(store)

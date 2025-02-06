@@ -62,10 +62,12 @@ watchEffect(() => {
 function upglide() {
     if (useCurrentChatHook().chatUserId != -1) {
         // fileNoExistToCreate(recordPath)
-        // 按照好友id, 聊天记录所属当前用户，搜索对应的聊天记录 
-        const search:ChatRecordSearch = {friendId: useCurrentChatHook().chatUserId, selfId: currentUserId}
+        // 按照好友id(群聊时为分组id), 聊天记录所属当前用户，以及类型(单聊还是群聊)，搜索对应的聊天记录 
+        const search:ChatRecordSearch = {friendId: useCurrentChatHook().chatUserId, selfId: currentUserId, chatType: useCurrentChatHook().chatType}
         window.electronApi.recordCount(search).then((count) => {
             console.log("friendId", useCurrentChatHook().chatUserId)
+            console.log("count:", count)
+
             // 聊天记录的时间戳，往前查询固定条数
             window.electronApi.readRecord(startDateTime, size, search)
                 .then((records_text) => {
@@ -80,6 +82,7 @@ function upglide() {
                         // console.log(count)
                     })
                 })
+            
         })
     }
 }
@@ -93,27 +96,38 @@ function scroll_msg_box() {
 }
 
 const addMsgEventType = 'addMsgInLocal'
+const cleanMsgEventType = 'cleanMsg'
 onMounted(() => {
     emitter.on(addMsgEventType, (val) => {
         chatRecords.value.push(val as ChatRecord)
+    })
+    emitter.on(cleanMsgEventType, () => {
+        console.log("clean ....")
+        chatRecords.value = []
+        startDateTime = -1
     })
 })
 
 
 onUnmounted(() => {
     emitter.off(addMsgEventType)
+    emitter.off(cleanMsgEventType)
 })
 
 function sendMsg() {
     // write record in local 
     const receiveUserId = useCurrentChatHook().chatUserId
+    const chatType = useCurrentChatHook().chatType
     const dateTime = new Date()
     const createdAt = formatDate(dateTime)
-    const record: ChatRecord = {saveType: "1", sendUserId: currentUserId, receiveUserId: receiveUserId, friendId: receiveUserId, content: inputText.value, dateTime: dateTime.getTime(), createdAt};
+    const record: ChatRecord = { chatType: chatType, saveType: "1", 
+        sendUserId: currentUserId, receiveUserId: receiveUserId, 
+        friendId: receiveUserId, content: inputText.value, 
+        dateTime: dateTime.getTime(), createdAt};
     console.log(record)
     window.electronApi.writeMsg({...record, selfId: currentUserId})
     // send msg to server 
-    emitter.emit("sendWsMsg", {...record, msgType: 2})
+    emitter.emit("sendWsMsg", {...record, msgType: 2, groupId: chatType == 2 ? receiveUserId : -1, chatType})
     // record to add current chat window
     chatRecords.value.push(record)
     // clear msg window

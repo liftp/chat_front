@@ -1,6 +1,11 @@
 <template>
     <div class="flex flex-wrap gap-2 " id="friendList" ref="freinds_local" v-for="friend in friendsLocal" :key="friend.friendId">
-      <el-card class="friend-info" shadow="hover" @click="choiceFriendChat(friend.friendId)">{{friend.friendRemark}}</el-card>
+    	<el-card class="friend-info" shadow="hover" @click="choiceFriendChat(friend.friendId, friend.type)">
+			<template v-if="friend.type === 2">
+				[群聊]
+			</template>
+			{{friend.friendRemark}}
+		</el-card>
       <!-- <el-card class="friend-info"  shadow="hover">Hover</el-card>
       <el-card class="friend-info"  shadow="never">Never</el-card> -->
     </div>
@@ -30,11 +35,12 @@ onMounted(() => {
 				// 写入local db
 				const msg: ChatRecord = JSON.parse(data)
 				msg.saveType = "1";
-				// 服务器的消息的friendId没有处理，是接收人（相对于发送人的好友而言），这里转换为发送人
-				msg.friendId = msg.sendUserId;
 				msg.selfId = useUserStoreHook().userId;
 				window.electronApi.writeMsg(msg)
-				emitter.emit('addMsgInLocal', msg)
+				// 判断是不是在当前聊天，然后展示
+				if (msg.friendId === useCurrentChatHook().chatUserId && msg.chatType === useCurrentChatHook().chatType) {
+					emitter.emit('addMsgInLocal', msg)
+				}
 			},
 			(err: string) => {
 				console.log('失败回调：', err)
@@ -76,9 +82,19 @@ onUnmounted(() => {
 
 
 // 更新聊天人id
-const choiceFriendChat = (friendId: number) => {
-  console.log("choice friend:", friendId)
-  useCurrentChatHook().choiceUserChat(friendId)
+const choiceFriendChat = (friendId: number, chatType: number) => {
+	const chatHook = useCurrentChatHook()
+	console.log("choice friend:", friendId)
+	// 当前用户不操作
+	if (friendId !== chatHook.chatUserId) {
+		// 清理当前窗口聊天记录
+		emitter.emit("cleanMsg")
+		
+		chatHook.choiceUserChat(friendId)
+		chatHook.setChatType(chatType)
+	}
+
+
 }
 
 
