@@ -1,3 +1,5 @@
-{"friendId":2,"friendName":"lisi","friendRemark":"李四","selfId":1,"_id":"XgYgeRteLMsPxuna"}
-{"friendId":1,"friendName":"zs","friendRemark":"张三","selfId":2,"_id":"Xj3zg8qimfF5TZap"}
-{"friendId":3,"friendName":"wangwu","friendRemark":"王五","selfId":2,"_id":"nhCa6Yj7ZD9ycnX1"}
+{"friendId":1,"friendName":"多人群聊","friendRemark":"开放群聊","selfId":1,"type":2,"_id":"P2GMPcmYxUT2gCDA"}
+{"friendId":2,"friendName":"lisi","friendRemark":"李四","selfId":1,"type":1,"_id":"UZ8gB353hCD36bzO"}
+{"friendId":3,"friendName":"wangwu","friendRemark":"王五","selfId":2,"type":1,"_id":"VWtJcw2FN8hfQwD3"}
+{"friendId":1,"friendName":"zs","friendRemark":"张三","selfId":2,"type":1,"_id":"f3o8QWhUxtnaFtXp"}
+{"friendId":1,"friendName":"多人群聊","friendRemark":"开放群聊","selfId":2,"type":2,"_id":"f3o8QWhUxtnaFtXx"}
