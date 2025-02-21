@@ -1,9 +1,9 @@
 import { request } from "@/util/request"
-import { FreindQuery } from "../types/friend_list"
+import { FriendQuery, FriendListResp } from "../types/friend_list"
 
-export function friendList(data: FreindQuery) {
-    return request<FreindQuery>({
-        url: "user/friendList",
+export function friendList(data: FriendQuery) {
+    return request<FriendListResp>({
+        url: "friendship/friendList",
         method: 'post',
         data
     })

@@ -17,7 +17,7 @@ export const connectWebsocket = (url: string, agentData: {}, successCallback: Ca
     console.log("ws url: ", url)
     createWebSocket()
     messageCallback = successCallback
-    errCallback = errCallback
+    errorCallback = errCallback
     sendDatas = agentData
 }
 

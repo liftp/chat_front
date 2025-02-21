@@ -1,5 +1,5 @@
 import Datastore from 'nedb'
-import { ChatRecord, FriendList } from './model/models'
+import { ChatRecord, FriendList, FriendRelationship } from './model/models'
 import {formatDate} from '../script/DateUtil'
 
 export const db: Datastore<ChatRecord> = new Datastore<ChatRecord>({
@@ -51,3 +51,11 @@ export const dbFreinds: Datastore<FriendList> = new Datastore<FriendList>({
 // dbFreinds.insert({friendId: 1, friendName:"zs", friendRemark: "张三", selfId: 2, type: 1})
 // dbFreinds.insert({friendId: 3, friendName:"wangwu", friendRemark: "王五", selfId: 2, type: 1})
 // dbFreinds.insert({friendId: 4, friendName:"多人群聊", friendRemark: "开放群聊", selfId: 1, type: 2})
+
+export const dbFreindship: Datastore<FriendRelationship> = new Datastore<FriendRelationship>({
+    filename: './friendshipDB.db',
+    autoload: true,
+    // inMemoryOnly: false, // 是否仅存在内存中
+    // timestampData: false, // 是属于creaedAt标记所有文档的插入和最后更新时间updatedAt
+})
+

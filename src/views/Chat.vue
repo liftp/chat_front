@@ -1,20 +1,35 @@
 <script setup lang="ts">
 
-    import FriendList from '@/components/FriendList.vue'
+    import ApplyRecord from '@/components/FriendList.vue';
+import ChatList from '@/components/ChatList.vue';
+    import FriendList from '@/components/ChatList.vue'
     import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
+    import NavList from '@/components/NavList.vue';
 
     import { useCurrentChatHook } from '@/store/modules/user';
+    
+    import { navSelectHook } from '@/store/modules/viewShow';
+
 
 </script>
 
 <template>
     <div class="common-layout" style="margin: 0px; padding: 0px;">
         <el-container>
+            <el-aside style="width: 26px; background-color: rgba(0, 0, 0, 0.08)">
+                
+                <NavList />
+            </el-aside>
             <el-aside class="chat-left">
-                <FriendList/>
+                <template v-if="navSelectHook().navName === 'chat'">
+                    <ChatList  />
+                </template>
+                <template v-if="navSelectHook().navName === 'user'">
+                    <ApplyRecord/>
+                </template>
             </el-aside>
             <el-main class="chat-right">
-                <MsgShowAndSend v-if="useCurrentChatHook().chatUserId != -1"/>
+                <MsgShowAndSend v-if="useCurrentChatHook().chatUserId != -1 && navSelectHook().navName === 'chat'"/>
             </el-main>
         </el-container>
     </div>

@@ -1,11 +1,16 @@
 export interface FriendRelationship {
-    friendId: string,
+    id: number,
+    friendId: number,
     friendName: string,
     friendRemark: string,
     selfId: string,
 }
 
-export interface FreindQuery {
+export interface FriendQuery {
     // 名称模糊搜索
-    name: string
+    name?: string,
+    id?: number,
+    searchType: number,
 }
+
+export type FriendListResp = ApiResponseData<FriendRelationship[]>
