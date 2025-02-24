@@ -7,3 +7,11 @@ export function getUserInfo() {
         method: 'post'
     })
 }
+
+export function searchUser(query: User.UserQuery) {
+    return request<User.UserInfoListResponse>({
+        url: "user/searchUser",
+        method: 'post',
+        data: query
+    })
+}

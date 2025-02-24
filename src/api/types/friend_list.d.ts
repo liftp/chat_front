@@ -13,4 +13,14 @@ export interface FriendQuery {
     searchType: number,
 }
 
+export interface ApplyFriend {
+
+    proposerRemark: string,
+    // appliedRemark: string, 
+    targetUser: number,
+    appliedRemark: string, 
+    applyRemark?: string
+}
+
 export type FriendListResp = ApiResponseData<FriendRelationship[]>
+export type FriendApplyResp = ApiResponseData<number>

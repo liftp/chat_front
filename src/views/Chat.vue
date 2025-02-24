@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
     import ApplyRecord from '@/components/FriendList.vue';
-import ChatList from '@/components/ChatList.vue';
+    import ChatList from '@/components/ChatList.vue';
     import FriendList from '@/components/ChatList.vue'
     import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
     import NavList from '@/components/NavList.vue';
