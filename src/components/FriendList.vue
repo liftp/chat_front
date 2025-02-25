@@ -1,19 +1,20 @@
 <template>
-<div>
+<div style="width: 100%;">
+    <!-- 搜索好友 -->
     <div  style="display: flex;">
-        <el-input v-model="searchName" placeholder="请输入用户名称" maxlength="15" throttle="" :prefix-icon="Search" @input="remoteSearch({searchType:1, name:searchName})"></el-input>
-        <!-- <el-icon class="add_user"><Plus /></el-icon> -->
+        <el-input v-model="searchName" placeholder="请输入好友名称" maxlength="15" throttle="" :prefix-icon="Search" @input="remoteSearch({searchType:1, name:searchName})"></el-input>
         <el-button ref="searchUserBtn" 
             :icon="Plus" 
             class="add_user"></el-button>
     </div>
+    <!-- 搜索用户结果展示 -->
     <div v-for="friend in friendsData" :key="friend.id">
-    <el-card class="friend-info" 
-            :class="friend.friendId === selectFriendId ? 'select_bgc' : ''"
-            @click="selectFriend(friend.friendId)">
-        {{friend.friendRemark}}--({{friend.friendName}})
-    </el-card>
-
+        <el-card class="friend-info" 
+                :class="friend.friendId === selectFriendId ? 'select_bgc' : ''"
+                @click="selectFriend(friend.friendId)">
+            {{friend.friendRemark}}--({{friend.friendName}})
+        </el-card>
+    </div>
     <!-- 搜索用户弹窗 -->
     <el-popover placement="right" 
         :width="400" 
@@ -24,10 +25,10 @@
         <el-input v-model="searchUsername" placeholder="请输入用户账号" maxlength="15" throttle="" :prefix-icon="Search" 
             @input="searchUserFunc({username: searchUsername})"></el-input>
         <el-table :data="userList">
-          <el-table-column width="100" property="id" label="id" />
-          <el-table-column width="100" property="username" label="账号" />
-          <el-table-column width="100" property="name" label="姓名" />
-          <el-table-column width="100" label="操作" >
+        <el-table-column width="100" property="id" label="id" />
+        <el-table-column width="100" property="username" label="账号" />
+        <el-table-column width="100" property="name" label="姓名" />
+        <el-table-column width="100" label="操作" >
             
             <template #default="scope">
                 <!-- 添加用户填写信息弹窗 -->
@@ -73,17 +74,11 @@
                 </el-popover>
             </template>
             
-          </el-table-column>
-        </el-table>
-
-        
-    </el-popover>
+        </el-table-column>
+    </el-table>
 
     
-
-        
-    
-</div>
+</el-popover>
 
 </div>
 </template>
@@ -104,7 +99,7 @@ import { useUserStoreHook } from '@/store/modules/user';
 const searchName = ref<string>('');
 const friendsData = ref<FriendRelationship[]>();
 const selectFriendId = ref<number>(-1);
-const searchUserBtn = ref<string>('');
+const searchUserBtn = ref<string>();
 const userList  = ref<UserInfo[]>([]);
 const searchUsername = ref<string>('');
 const searchPopoverVisible = ref<boolean>(false);

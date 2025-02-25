@@ -1,16 +1,20 @@
 <template>
-    <div class="flex flex-wrap gap-5" id="friendList" ref="freinds_local" v-for="friend in friendsLocal" :key="friend.friendId">
-    	<el-card class="friend-info" 
-			:class="friend.friendId === useCurrentChatHook().chatUserId ? 'select_bgc' : ''"
-			@click="choiceFriendChat(friend.friendId, friend.type)">
-			<template v-if="friend.type === 2">
-				[群聊]
-			</template>
-			{{friend.friendRemark}}
-		</el-card>
-      <!-- <el-card class="friend-info"  shadow="hover">Hover</el-card>
-      <el-card class="friend-info"  shadow="never">Never</el-card> -->
-    </div>
+	<div style="width: 100%;">
+		<div class="flex flex-wrap gap-5" id="friendList" ref="freinds_local" 
+			v-for="friend in friendsLocal" 
+			:key="friend.friendId">
+			<el-card class="friend-info" 
+				:class="friend.friendId === useCurrentChatHook().chatUserId ? 'select_bgc' : ''"
+				@click="choiceFriendChat(friend.friendId, friend.type)">
+				<template v-if="friend.type === 2">
+					[群聊]
+				</template>
+				{{friend.friendRemark}}
+			</el-card>
+		  <!-- <el-card class="friend-info"  shadow="hover">Hover</el-card>
+		  <el-card class="friend-info"  shadow="never">Never</el-card> -->
+		</div>
+	</div>
 </template>
 <script setup lang="ts">
 import { ChatRecord, FriendList } from '@/db/model/models';
@@ -20,6 +24,8 @@ import { onMounted, onUnmounted, Ref, ref, watchEffect } from 'vue';
 import {connectWebsocket, closeWebSocket, sendWsMsg} from '../ws/WebSocketServer'
 import emitter from '@/util/emitter';
 import { selectNotReadMsg } from '@/api/msg';
+import { container } from '@/config/inject_container.config';
+import { IMsgConsumer } from '@/service/IMsgConsume';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const host = window.location.host;
@@ -34,6 +40,19 @@ onMounted(() => {
 			{msgType: 1},
 			(data: string) => {
 				console.log('返回的数据：', data)
+				// 按约定： msgType + "," + msgObj,解析数据
+				const commaIdx = data.indexOf(",")
+				if (commaIdx > -1) {
+					const msgTypeStr = data.substring(0, commaIdx)
+					// 类型不为空 并且是数字
+					if (msgTypeStr != null && /^\d*$/.test(msgTypeStr)) {
+						const msgType = Number(msgTypeStr)
+						// 去处理相应类型的消息
+						const msgConsumers = container.get<IMsgConsumer[]>("IMsgConsumer")
+						msgConsumers.filter(e => e.msgType == msgType)
+							.forEach(c => c.msgConsume(data.substring(commaIdx + 1)))
+					}
+				}
 				// 写入local db
 				const msg: ChatRecord = JSON.parse(data)
 				msg.saveType = "1";

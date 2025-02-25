@@ -4,6 +4,7 @@ import store from '@/store/index'
 import router from '@/router'
 import App from './App.vue'
 import { getToken } from '@/util/cache/cookies'
+import "reflect-metadata"
 
 import "element-plus/dist/index.css"
 import "element-plus/theme-chalk/dark/css-vars.css"

@@ -2,7 +2,6 @@
 
     import ApplyRecord from '@/components/FriendList.vue';
     import ChatList from '@/components/ChatList.vue';
-    import FriendList from '@/components/ChatList.vue'
     import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
     import NavList from '@/components/NavList.vue';
 
@@ -21,15 +20,15 @@
                 <NavList />
             </el-aside>
             <el-aside class="chat-left">
-                <template v-if="navSelectHook().navName === 'chat'">
-                    <ChatList  />
+                <template  :style="navSelectHook().navName === 'chat' ? 'display:flex' : 'display:none'">
+                    <ChatList/>
                 </template>
-                <template v-if="navSelectHook().navName === 'user'">
+                <template :style="navSelectHook().navName === 'user' ? 'display:flex' : 'display:none'">
                     <ApplyRecord/>
                 </template>
             </el-aside>
             <el-main class="chat-right">
-                <MsgShowAndSend v-if="useCurrentChatHook().chatUserId != -1 && navSelectHook().navName === 'chat'"/>
+                <MsgShowAndSend :style="(useCurrentChatHook().chatUserId != -1 && navSelectHook().navName === 'chat') ?  'display:flex' : 'display:none'"/>
             </el-main>
         </el-container>
     </div>
