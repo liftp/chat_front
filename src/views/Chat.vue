@@ -2,15 +2,10 @@
 
     import ApplyRecord from '@/components/FriendList.vue';
     import ChatList from '@/components/ChatList.vue';
-    import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
     import NavList from '@/components/NavList.vue';
-
-    import { useCurrentChatHook } from '@/store/modules/user';
     
     import { navSelectHook } from '@/store/modules/viewShow';
-    import ApplyFirendRecord from '@/components/ApplyFirendRecord.vue';
-    import { MainMenu } from '@/constants/TypeEnum';
-    import { showControl } from '@/util/menu_control/menu';
+
 
 
 </script>
@@ -19,21 +14,15 @@
     <div class="common-layout" style="margin: 0px; padding: 0px;">
         <el-container>
             <el-aside style="width: 26px; background-color: rgba(0, 0, 0, 0.08)">
-                
                 <NavList />
             </el-aside>
-            <el-aside class="chat-left">
-                <template  :style="navSelectHook().navName === 'chat' ? 'display:flex' : 'display:none'">
-                    <ChatList/>
-                </template>
-                <template :style="navSelectHook().navName === 'user' ? 'display:flex' : 'display:none'">
-                    <ApplyRecord/>
-                </template>
-            </el-aside>
-            <el-main class="chat-right">
-                <MsgShowAndSend :style="showControl('chat', undefined, () => useCurrentChatHook().chatUserId != -1)"/>
-                <ApplyFirendRecord :style="showControl('user', MainMenu.APPLY_RECORD.description, () => true)"/>
-            </el-main>
+            <template  :style="navSelectHook().navName === 'chat' ? 'display:flex' : 'display:none'" style="width: 100%;">
+                <ChatList/>
+            </template>
+            <template :style="navSelectHook().navName === 'user' ? 'display:flex' : 'display:none'" style="width: 100%;">
+                <ApplyRecord/>
+            </template>
+
         </el-container>
     </div>
     

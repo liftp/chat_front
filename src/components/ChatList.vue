@@ -1,20 +1,24 @@
 <template>
-	<div style="width: 100%;">
-		<div class="flex flex-wrap gap-5" id="friendList" ref="freinds_local" 
-			v-for="friend in friendsLocal" 
-			:key="friend.friendId">
-			<el-card class="friend-info" 
-				:class="friend.friendId === useCurrentChatHook().chatUserId && friend.type == useCurrentChatHook().chatType ? 'select_bgc' : ''"
-				@click="choiceFriendChat(friend.friendId, friend.type)">
-				<template v-if="friend.type === 2">
-					[群聊]
-				</template>
-				{{friend.friendRemark}}
-			</el-card>
-		  <!-- <el-card class="friend-info"  shadow="hover">Hover</el-card>
-		  <el-card class="friend-info"  shadow="never">Never</el-card> -->
-		</div>
-	</div>
+		<el-aside class="chat-left">
+			<div class="flex flex-wrap gap-5" id="friendList" ref="freinds_local" 
+				v-for="friend in friendsLocal" 
+				:key="friend.friendId">
+				<el-card class="friend-info" 
+					:class="friend.friendId === useCurrentChatHook().chatUserId && friend.type == useCurrentChatHook().chatType ? 'select_bgc' : ''"
+					@click="choiceFriendChat(friend.friendId, friend.type)">
+					<template v-if="friend.type === 2">
+						[群聊]
+					</template>
+					{{friend.friendRemark}}
+				</el-card>
+			<!-- <el-card class="friend-info"  shadow="hover">Hover</el-card>
+			<el-card class="friend-info"  shadow="never">Never</el-card> -->
+			</div>
+		</el-aside>
+		<el-main class="chat-right">
+			<MsgShowAndSend :style="showControl(() => useCurrentChatHook().chatUserId != -1)"/>
+		</el-main>
+
 </template>
 <script setup lang="ts">
 import { ChatRecord, FriendList } from '@/db/model/models';
@@ -27,6 +31,9 @@ import { selectNotReadMsg } from '@/api/msg';
 import { container } from '@/config/inject_container.config';
 import { IMsgConsumer } from '@/service/IMsgConsume';
 import SERVICE_IDENTIFIES from '@/constants/identifiers';
+import { showControl } from '@/util/menu_control/menu';
+
+import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const host = window.location.host;
@@ -121,5 +128,19 @@ const choiceFriendChat = (friendId: number, chatType: number) => {
   }
   .select_bgc {
 	background-color: #c4c4c4;
+  }
+  .chat-left {
+    /* margin-left: 0px; */
+    background-color: #cfcfcf;
+    border: 1px solid #e4e7ed;
+    width: 30%;
+    border-radius: 4px;
+  }
+  .chat-right {
+    width: 70%;
+    border: 1px solid #e4e7ed;
+    border-radius: 4px;
+    background-color: #cfcfcf;
+    height: 100vh;
   }
 </style>

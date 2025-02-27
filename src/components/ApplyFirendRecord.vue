@@ -1,14 +1,12 @@
 <template>
-<div>
     <el-table
         :data="applyRecords"
         style="width: 100%"
     >
-        <el-table-column prop="proposerName" label="好友账号" width="100" />
-        <el-table-column prop="proposerRemark" label="描述" width="100" />
-        <el-table-column prop="applyPassDesc" label="状态" width="60"/>
+        <el-table-column prop="proposerName" label="好友账号" min-width="100" />
+        <el-table-column prop="proposerRemark" label="描述" min-width="100" />
+        <el-table-column prop="applyPassDesc" label="状态" min-width="60"/>
     </el-table>
-</div>
 </template>
 <script lang="ts" setup>
 import { applyStatusShowDesc } from '@/constants/TypeEnum';
