@@ -41,3 +41,16 @@ export interface FriendRelationship {
     friendRemark: string,
     selfId: number,
 }
+
+export interface ApplyFriend {
+    proposerId: number,
+    proposerRemark: string,
+    proposerName: string,
+    // appliedRemark: string, 
+    targetUser: number,
+    appliedRemark?: string, 
+    applyRemark?: string
+    applyPass: number,
+    applyPassDesc?: string,
+    selfId: number,
+}

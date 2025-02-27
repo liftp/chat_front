@@ -7,6 +7,11 @@
             :icon="Plus" 
             class="add_user"></el-button>
     </div>
+    <!-- 固定好友申请列表 -->
+    <el-card class="new_friend_tab" @click="navSelectHook().mainWindowSelect(MainMenu.APPLY_RECORD.description || '')">
+        <el-icon ><UserFilled /></el-icon>
+        新的朋友
+    </el-card>
     <!-- 搜索用户结果展示 -->
     <div v-for="friend in friendsData" :key="friend.id">
         <el-card class="friend-info" 
@@ -25,56 +30,56 @@
         <el-input v-model="searchUsername" placeholder="请输入用户账号" maxlength="15" throttle="" :prefix-icon="Search" 
             @input="searchUserFunc({username: searchUsername})"></el-input>
         <el-table :data="userList">
-        <el-table-column width="100" property="id" label="id" />
-        <el-table-column width="100" property="username" label="账号" />
-        <el-table-column width="100" property="name" label="姓名" />
-        <el-table-column width="100" label="操作" >
-            
-            <template #default="scope">
-                <!-- 添加用户填写信息弹窗 -->
-                <el-popover
-                    placement="bottom"
-                    trigger="click"
-                    title="好友申请"
-                    :width="300"
-                >
-                    <div class="apply_win">
-                        <span class="width_apply_label">账号:</span> 
-                        <span>{{ scope.row.username }}</span>
-                    </div>
-                    <div class="apply_win">
-                        <span class="width_apply_label">名称:</span> 
-                        <span>{{ scope.row.name }}</span>
-                    </div>
-                    <div class="apply_win">
-                        <span class="width_apply_label">好友备注:</span> 
-                        <el-input v-model="friendRemark" class="apply_input"></el-input>
-                    </div>
-                    <div class="apply_win">
-                        <span class="width_apply_label"> 本人描述: </span>
-                        <el-input v-model="applyDesc" class="apply_input"></el-input>
-                    </div>
-                    <div class="apply_win">
-                        <span class="width_apply_label"> 本人账号: </span>
-                        <span>{{ applyUsername }}</span>
-                    </div>
-                    <el-button type="primary"
-                        style="margin-top: 15px;"
-                        size="small"
-                        @click="applyFriendFunc({proposerRemark: applyDesc, targetUser: scope.row.userId, appliedRemark: friendRemark})">
-                        发送
-                    </el-button>
-                    
-                    <template #reference>
+            <el-table-column width="100" property="id" label="id" />
+            <el-table-column width="100" property="username" label="账号" />
+            <el-table-column width="100" property="name" label="姓名" />
+            <el-table-column width="100" label="操作" >
+                
+                <template #default="scope">
+                    <!-- 添加用户填写信息弹窗 -->
+                    <el-popover
+                        placement="bottom"
+                        trigger="click"
+                        title="好友申请"
+                        :width="300"
+                    >
+                        <div class="apply_win">
+                            <span class="width_apply_label">账号:</span> 
+                            <span>{{ scope.row.username }}</span>
+                        </div>
+                        <div class="apply_win">
+                            <span class="width_apply_label">名称:</span> 
+                            <span>{{ scope.row.name }}</span>
+                        </div>
+                        <div class="apply_win">
+                            <span class="width_apply_label">好友备注:</span> 
+                            <el-input v-model="friendRemark" class="apply_input"></el-input>
+                        </div>
+                        <div class="apply_win">
+                            <span class="width_apply_label"> 本人描述: </span>
+                            <el-input v-model="applyDesc" class="apply_input"></el-input>
+                        </div>
+                        <div class="apply_win">
+                            <span class="width_apply_label"> 本人账号: </span>
+                            <span>{{ applyUsername }}</span>
+                        </div>
                         <el-button type="primary"
+                            style="margin-top: 15px;"
                             size="small"
-                            @click="searchPopoverVisible = true"
-                            >添加</el-button>
-                    </template>
-                </el-popover>
-            </template>
-            
-        </el-table-column>
+                            @click="applyFriendFunc({proposerRemark: applyDesc, targetUser: scope.row.userId, appliedRemark: friendRemark})">
+                            发送
+                        </el-button>
+                        
+                        <template #reference>
+                            <el-button type="primary"
+                                size="small"
+                                @click="searchPopoverVisible = true"
+                                >添加</el-button>
+                        </template>
+                    </el-popover>
+                </template>
+                
+            </el-table-column>
     </el-table>
 
     
@@ -87,12 +92,15 @@
 import { Plus, Search } from '@element-plus/icons-vue'
 import { onMounted, ref } from 'vue'
 import { applyFriend, friendList } from '@/api/friend_list';
-import { ApplyFriend, FriendQuery, FriendRelationship } from '@/api/types/friend_list';
+import { ApplyFriendDTO, FriendQuery, FriendRelationship } from '@/api/types/friend_list';
 import { ElNotification, scrollbarProps } from 'element-plus';
 import { debounce } from 'lodash-es'
 import { UserInfo, UserQuery } from '@/api/types/user_info';
 import { searchUser } from '@/api/user_info';
 import { useUserStoreHook } from '@/store/modules/user';
+import { ElTable, ElTableColumn } from 'element-plus';
+import { navSelectHook } from '@/store/modules/viewShow';
+import { MainMenu } from '@/constants/TypeEnum';
 
 
 
@@ -113,6 +121,7 @@ const applyId = ref<number>(useUserStoreHook().userId);
 
 const selectFriend = debounce((friendId: number) => {
     selectFriendId.value = friendId
+    navSelectHook().selectNav(MainMenu.FRIEND_LIST.description || '')
 }, 300)
 
 const remoteSearch = (query: FriendQuery) => {
@@ -144,7 +153,7 @@ const searchUserFunc = debounce((query: UserQuery) => {
     }
 },300)
 
-const applyFriendFunc = (applyInfo: ApplyFriend) => {
+const applyFriendFunc = (applyInfo: ApplyFriendDTO) => {
     applyFriend(applyInfo)
 }
 onMounted(() => {
@@ -178,5 +187,8 @@ onMounted(() => {
 }
 .apply_input {
     margin-left: 10px;
+}
+.new_friend_tab {
+    background-color: #fcffd4;
 }
 </style>

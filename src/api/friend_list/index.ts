@@ -1,5 +1,5 @@
 import { request } from "@/util/request"
-import { FriendQuery, FriendListResp, ApplyFriend, FriendApplyResp } from "../types/friend_list"
+import { FriendQuery, FriendListResp, ApplyFriendDTO, FriendApplyResp } from "../types/friend_list"
 
 export function friendList(data: FriendQuery) {
     return request<FriendListResp>({
@@ -9,7 +9,7 @@ export function friendList(data: FriendQuery) {
     })
 }
 
-export function applyFriend(data: ApplyFriend) {
+export function applyFriend(data: ApplyFriendDTO) {
     return request<FriendApplyResp>({
         url: "applyFriend/applyFriend",
         method: 'post',

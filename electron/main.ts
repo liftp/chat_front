@@ -6,7 +6,8 @@ import { fileURLToPath } from 'url'
 
 // 预加载ESM模块
 import {readRecord, countRecord, saveRecord} from '../src/db/service/ChatRecordService'
-import {findFriend} from '../src/db/service/FriendListService'
+import { findFriend } from '../src/db/service/FriendListService'
+import { recordList } from '../src/db/service/ApplyFriendService'
 import { ChatRecord } from '../src/db/model/models'
 // import('./preload/preload.mjs')
 const __filenameNew = fileURLToPath(import.meta.url)
@@ -59,7 +60,11 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('write-msg', async (event, msg: ChatRecord) => {
     await saveRecord(msg);
+  }) 
+  ipcMain.handle('apply-record-find', async (event, selfId: number) => {
+    await recordList(selfId);
   })
+
   createWindow()
   app.on('activate', function () {
     // 通常在 macOS 上，当点击 dock 中的应用程序图标时，如果没有其他

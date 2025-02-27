@@ -1,0 +1,32 @@
+import { ApplyFriend } from "../model/models";
+import { dbApplyRecord } from "../NeDB";
+
+export const recordList = (selfId: number) => {
+    return new Promise<ApplyFriend[]>((resolve, reject) => {
+        // console.log("find reg:", name);
+        dbApplyRecord.find<ApplyFriend>({selfId})
+            .exec((err, docs) => {
+                if (err != null) {
+                    reject(err)
+                }
+                // console.log("find friends:", docs)
+                resolve(docs)
+            })
+    })
+}
+
+export const saveRecord = (record: ApplyFriend) =>  {
+    dbApplyRecord.insert(record);
+    return true;
+};
+
+export const delRecord = (friendId: string, selfId: string) =>  {
+    let num = 0;
+    dbApplyRecord.remove({friendId, selfId}, (err, docsNum) => {
+        if (err != null) {
+            throw err;
+        }
+        num = docsNum;
+    });
+    return num;
+};

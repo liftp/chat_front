@@ -8,6 +8,9 @@
     import { useCurrentChatHook } from '@/store/modules/user';
     
     import { navSelectHook } from '@/store/modules/viewShow';
+    import ApplyFirendRecord from '@/components/ApplyFirendRecord.vue';
+    import { MainMenu } from '@/constants/TypeEnum';
+    import { showControl } from '@/util/menu_control/menu';
 
 
 </script>
@@ -28,7 +31,8 @@
                 </template>
             </el-aside>
             <el-main class="chat-right">
-                <MsgShowAndSend :style="(useCurrentChatHook().chatUserId != -1 && navSelectHook().navName === 'chat') ?  'display:flex' : 'display:none'"/>
+                <MsgShowAndSend :style="showControl('chat', undefined, () => useCurrentChatHook().chatUserId != -1)"/>
+                <ApplyFirendRecord :style="showControl('user', MainMenu.APPLY_RECORD.description, () => true)"/>
             </el-main>
         </el-container>
     </div>

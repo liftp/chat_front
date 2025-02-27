@@ -3,6 +3,7 @@
         <el-container style="height: 78dvh;">
                 <el-main>
                     <div id="chatBox" ref="msg_arr" class="chat-msg-box" @scroll="scroll_msg_box">
+                        <el-scrollbar height="100%">
                             <div  v-for="(line, index) in chatRecords" :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'" :key="index" style="margin-top: 10px;">
                                 <template v-if="line.sendUserId !== currentUserId">
                                     <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
@@ -11,6 +12,7 @@
                                     <div class="item item-right-child">{{line.content}}</div><div class="bubble-triangle bubble-triangle-left"></div>
                                 </template>
                             </div>
+                        </el-scrollbar>
                     </div>
                 </el-main>
 
@@ -136,7 +138,7 @@ function sendMsg() {
 
 </script>
 
-<style>
+<style scoped>
 .chat-msg-box {
     /* height: 100%; */
     width: 100%;
@@ -209,6 +211,18 @@ function sendMsg() {
 .bubble-triangle-left {
     border-left-color: rgb(0, 200, 0);
     left: -3px;
+}
+
+.scrollbar-demo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  margin: 10px;
+  text-align: center;
+  border-radius: 4px;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
 }
 
 

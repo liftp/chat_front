@@ -4,7 +4,7 @@
 			v-for="friend in friendsLocal" 
 			:key="friend.friendId">
 			<el-card class="friend-info" 
-				:class="friend.friendId === useCurrentChatHook().chatUserId ? 'select_bgc' : ''"
+				:class="friend.friendId === useCurrentChatHook().chatUserId && friend.type == useCurrentChatHook().chatType ? 'select_bgc' : ''"
 				@click="choiceFriendChat(friend.friendId, friend.type)">
 				<template v-if="friend.type === 2">
 					[群聊]
@@ -26,6 +26,7 @@ import emitter from '@/util/emitter';
 import { selectNotReadMsg } from '@/api/msg';
 import { container } from '@/config/inject_container.config';
 import { IMsgConsumer } from '@/service/IMsgConsume';
+import SERVICE_IDENTIFIES from '@/constants/identifiers';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const host = window.location.host;
@@ -36,7 +37,6 @@ onMounted(() => {
 	// ws连接
 	connectWebsocket(
 			`ws://${host}${import.meta.env.VITE_WS_PATH}chat?token=${useUserStoreHook().token}`,
-			// "ws://localhost:9001/chat",
 			{msgType: 1},
 			(data: string) => {
 				console.log('返回的数据：', data)
@@ -48,19 +48,10 @@ onMounted(() => {
 					if (msgTypeStr != null && /^\d*$/.test(msgTypeStr)) {
 						const msgType = Number(msgTypeStr)
 						// 去处理相应类型的消息
-						const msgConsumers = container.get<IMsgConsumer[]>("IMsgConsumer")
-						msgConsumers.filter(e => e.msgType == msgType)
+						const msgConsumers = container.getAll<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
+						msgConsumers.filter(e => e.msgType === msgType)
 							.forEach(c => c.msgConsume(data.substring(commaIdx + 1)))
 					}
-				}
-				// 写入local db
-				const msg: ChatRecord = JSON.parse(data)
-				msg.saveType = "1";
-				msg.selfId = useUserStoreHook().userId;
-				window.electronApi.writeMsg(msg)
-				// 判断是不是在当前聊天，然后展示
-				if (msg.friendId === useCurrentChatHook().chatUserId && msg.chatType === useCurrentChatHook().chatType) {
-					emitter.emit('addMsgInLocal', msg)
 				}
 			},
 			(err: string) => {
