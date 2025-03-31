@@ -21,3 +21,4 @@ export type ApplyFriendDTO  = Partial<ApplyFriend>
 
 export type FriendListResp = ApiResponseData<FriendRelationship[]>
 export type FriendApplyResp = ApiResponseData<number>
+export type FriendApplyRecordResp = ApiResponseData<ApplyFriend[]>

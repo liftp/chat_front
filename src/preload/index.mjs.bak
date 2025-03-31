@@ -13,11 +13,14 @@ const findFriend = async (name, selfId) => {
 const writeMsg = async (msg) => {
 	await ipcRenderer.invoke('write-msg', msg)
 }
-
+const applyRecordFind = async (selfId) => {
+	await ipcRenderer.invoke('apply-record-find', selfId)
+}
 
 contextBridge.exposeInMainWorld('electronApi', {
 	readRecord,
 	recordCount,
 	findFriend,
-	writeMsg
+	writeMsg,
+	applyRecordFind,
 })

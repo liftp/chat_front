@@ -8,7 +8,8 @@ import { fileURLToPath } from 'url'
 import {readRecord, countRecord, saveRecord} from '../src/db/service/ChatRecordService'
 import { findFriend } from '../src/db/service/FriendListService'
 import { recordList } from '../src/db/service/ApplyFriendService'
-import { ChatRecord } from '../src/db/model/models'
+import {saveRecord as saveApplyFriend} from "../src/db/service/ApplyFriendService"
+import { ApplyFriend, ChatRecord } from '../src/db/model/models'
 // import('./preload/preload.mjs')
 const __filenameNew = fileURLToPath(import.meta.url)
 
@@ -63,6 +64,9 @@ app.whenReady().then(() => {
   }) 
   ipcMain.handle('apply-record-find', async (event, selfId: number) => {
     await recordList(selfId);
+  })
+  ipcMain.handle('apply-record-add', async (event, data: ApplyFriend) => {
+    await saveApplyFriend(data);
   })
 
   createWindow()

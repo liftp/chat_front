@@ -50,7 +50,7 @@ export interface ApplyFriend {
     targetUser: number,
     appliedRemark?: string, 
     applyRemark?: string
-    applyPass: number,
+    applyPass: number, // 申请状态： 0:申请中 1:通过 2:拒绝
     applyPassDesc?: string,
     selfId: number,
 }
