@@ -100,7 +100,7 @@
 <script lang="ts" setup>
 import { Plus, Search } from '@element-plus/icons-vue'
 import { onMounted, onUnmounted, ref } from 'vue'
-import { applyFriend, applyRecord, friendList } from '@/api/friend_list';
+import { applyFriend, friendList } from '@/api/friend_list';
 import { ApplyFriendDTO, FriendQuery, FriendRelationship } from '@/api/types/friend_list';
 import { ElNotification, scrollbarProps } from 'element-plus';
 import { debounce } from 'lodash-es'
@@ -112,9 +112,6 @@ import { navSelectHook } from '@/store/modules/viewShow';
 import { MainMenu } from '@/constants/TypeEnum';
 import { showControl } from '@/util/menu_control/menu';
 import ApplyFirendRecord from './ApplyFirendRecord.vue';
-import { ApplyFriend } from '@/db/model/models';
-import emitter from '@/util/emitter';
-import { etFriendApply } from '@/constants/emitter_type';
 
 
 const searchName = ref<string>('');
@@ -131,7 +128,6 @@ const applyDesc = ref<string>(useUserStoreHook().realname);
 const applyUsername = ref<string>(useUserStoreHook().loginName);
 const friendRemark = ref<string>('');
 const applyId = ref<number>(useUserStoreHook().userId);
-const applyRecords = ref<ApplyFriend[]>();
 
 const selectFriend = debounce((friendId: number) => {
     selectFriendId.value = friendId
@@ -175,20 +171,8 @@ onMounted(() => {
     // 从网络加载好友列表
     const query: FriendQuery = {searchType: 1, name: ''}
     remoteSearch(query);
-    // 加载申请记录
-    applyRecord()
-        .then(records => {
-            applyRecords.value = records.data;
-        })
-    // 好友申请触发器
-    emitter.on(etFriendApply, (val) => {
-        applyRecords.value?.push(val as ApplyFriend)
-    })
 })
 
-onUnmounted(() => {
-    emitter.off(etFriendApply)
-})
 
 </script>
 

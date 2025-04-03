@@ -9,10 +9,23 @@ export const recordList = (selfId: number) => {
                 if (err != null) {
                     reject(err)
                 }
-                // console.log("find friends:", docs)
+                console.log("find friends:", docs)
                 resolve(docs)
             })
     })
+}
+
+export const updateRecord = (record: ApplyFriend) => {
+    dbApplyRecord.update(
+        {selfId: record.selfId, proposerId: record.proposerId, targetUser: record.targetUser}, 
+        {$set: {applyPass: record.applyPass}}, {},
+        (err: Error | null, numberOfUpdated: number, affectedDocuments: any, upsert: boolean) => {
+            if (err) {
+                console.log("更新申请状态异常：", err)
+            }
+            console.log("更新申请记录数量:", numberOfUpdated)
+        }
+    )
 }
 
 export const saveRecord = (record: ApplyFriend) =>  {

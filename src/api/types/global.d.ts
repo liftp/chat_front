@@ -7,6 +7,8 @@ export interface ElectronApi {
     writeMsg: (msg: ChatRecord) => Promise<void>;
     applyRecordFind: (self: number) => Promise<ApplyFriend[]>;
     applyRecordAdd: (data: ApplyFriend) => Promise<void>;
+    applyRecordUpdate: (data: ApplyFriend) => Promise<void>;
+    friendshipAdd: (data: FriendRelationship) => Promise<void>;
 }
 
 declare global {

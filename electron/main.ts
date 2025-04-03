@@ -7,9 +7,10 @@ import { fileURLToPath } from 'url'
 // 预加载ESM模块
 import {readRecord, countRecord, saveRecord} from '../src/db/service/ChatRecordService'
 import { findFriend } from '../src/db/service/FriendListService'
-import { recordList } from '../src/db/service/ApplyFriendService'
+import { recordList, updateRecord } from '../src/db/service/ApplyFriendService'
 import {saveRecord as saveApplyFriend} from "../src/db/service/ApplyFriendService"
-import { ApplyFriend, ChatRecord } from '../src/db/model/models'
+import {saveRecord as saveFriendship} from "../src/db/service/FriendshipService"
+import { ApplyFriend, ChatRecord, FriendRelationship } from '../src/db/model/models'
 // import('./preload/preload.mjs')
 const __filenameNew = fileURLToPath(import.meta.url)
 
@@ -63,10 +64,16 @@ app.whenReady().then(() => {
     await saveRecord(msg);
   }) 
   ipcMain.handle('apply-record-find', async (event, selfId: number) => {
-    await recordList(selfId);
+    return await recordList(selfId);
   })
   ipcMain.handle('apply-record-add', async (event, data: ApplyFriend) => {
     await saveApplyFriend(data);
+  })
+  ipcMain.handle('apply-record-update', async (event, data: ApplyFriend) => {
+    await updateRecord(data);
+  })
+  ipcMain.handle('friendship-add', async (event, data: FriendRelationship) => {
+    await saveFriendship(data);
   })
 
   createWindow()
