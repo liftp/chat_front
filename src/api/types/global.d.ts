@@ -1,4 +1,5 @@
 import { ApplyFriend, ChatRecord, ChatRecordSearch } from "@/db/model/models";
+import { FriendRelationship } from "@/db/model/models";
 
 export interface ElectronApi {
     recordCount: (search?:ChatRecordSearch) => Promise<number>;

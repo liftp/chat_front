@@ -4,8 +4,8 @@ class ApplyStatus {
 }
 
 const APPLYING = {type: 0, desc: '未添加'} as ApplyStatus
-const APPLY_PASS = {type: 0, desc: '已添加'} as ApplyStatus
-const APPLY_REJECT = {type: 0, desc: '拒绝'} as ApplyStatus
+const APPLY_PASS = {type: 1, desc: '已添加'} as ApplyStatus
+const APPLY_REJECT = {type: 2, desc: '拒绝'} as ApplyStatus
 
 const enumType = [APPLYING, APPLY_PASS, APPLY_REJECT]
 

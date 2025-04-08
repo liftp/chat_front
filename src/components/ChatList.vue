@@ -29,11 +29,12 @@ import {connectWebsocket, closeWebSocket, sendWsMsg} from '../ws/WebSocketServer
 import emitter from '@/util/emitter';
 import { selectNotReadMsg } from '@/api/msg';
 import { container } from '@/config/inject_container.config';
-import { IMsgConsumer } from '@/service/IMsgConsume';
+import { IMsgConsumer } from '@/service/IMsgConsumer';
 import SERVICE_IDENTIFIES from '@/constants/identifiers';
 import { showControl } from '@/util/menu_control/menu';
 
 import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
+import { etAddFriendship } from '@/constants/emitter_type';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const host = window.location.host;
@@ -69,6 +70,9 @@ onMounted(() => {
 	emitter.on(sendWsMsgEventType, (val) => {
 		sendWsMsg(val) 
     })
+	emitter.on(etAddFriendship, (val) => {
+		friendsLocal.value.push(val as FriendList)
+    })
 	// 拉取未读消息,应该同步于消息展示之前(加载好友列表之前即可)
 	selectNotReadMsg()
 		.then((docs) => {
@@ -102,15 +106,15 @@ onUnmounted(() => {
 // 更新聊天人id
 const choiceFriendChat = (friendId: number, chatType: number) => {
 	const chatHook = useCurrentChatHook()
-	console.log("choice friend:", friendId)
+	console.log("choice friend:", friendId, "chatType:", chatType)
 	// 当前用户不操作
 	if (friendId !== chatHook.chatUserId) {
 		// 清理当前窗口聊天记录
 		emitter.emit("cleanMsg")
 		
-		chatHook.choiceUserChat(friendId)
-		chatHook.setChatType(chatType)
 	}
+	chatHook.choiceUserChat(friendId)
+	chatHook.setChatType(chatType)
 
 
 }

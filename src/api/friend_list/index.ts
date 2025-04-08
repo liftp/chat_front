@@ -24,3 +24,11 @@ export function applyRecord(data?: number) {
         data
     })
 }
+
+export function applyFriendConfirm(data: ApplyFriendDTO) {
+    return request<FriendApplyResp>({
+        url: "applyFriend/applyFriendConfirm",
+        method: 'post',
+        data
+    })
+}

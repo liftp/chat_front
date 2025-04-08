@@ -111,7 +111,7 @@ import { ElTable, ElTableColumn } from 'element-plus';
 import { navSelectHook } from '@/store/modules/viewShow';
 import { MainMenu } from '@/constants/TypeEnum';
 import { showControl } from '@/util/menu_control/menu';
-import ApplyFirendRecord from './ApplyFirendRecord.vue';
+import ApplyFirendRecord from './ApplyFriendRecord.vue';
 
 
 const searchName = ref<string>('');
