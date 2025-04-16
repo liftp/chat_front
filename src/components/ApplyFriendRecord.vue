@@ -35,11 +35,11 @@
                             确定
                         </el-button>
                         <template #reference>
-                            <el-button type="primary">接受</el-button>
+                            <el-button type="primary" size="small">接受</el-button>
                         </template>
                         
                     </el-popover>
-                    <el-button type="primary" @click="applyReject(apply)">拒绝</el-button>
+                    <el-button type="primary"  size="small" @click="applyReject(apply)">拒绝</el-button>
                     
                 </span>
             </div>
@@ -82,7 +82,7 @@ onMounted(() => {
     friendListFind()
     // 好友申请触发器
     emitter.on(etFriendApply, (val) => {
-        applyRecords.value?.push(val as ApplyFriend)
+        friendListFind()
     })
 })
 

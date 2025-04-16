@@ -44,6 +44,7 @@
                                 placement="bottom"
                                 trigger="click"
                                 title="好友申请"
+                                :visible="applyWindowShow"
                                 :width="300"
                             >
                                 <div class="apply_win">
@@ -76,7 +77,7 @@
                                 <template #reference>
                                     <el-button type="primary"
                                         size="small"
-                                        @click="searchPopoverVisible = true"
+                                        @click="applyWindowShow = true"
                                         >添加</el-button>
                                 </template>
                             </el-popover>
@@ -128,6 +129,7 @@ const applyDesc = ref<string>(useUserStoreHook().realname);
 const applyUsername = ref<string>(useUserStoreHook().loginName);
 const friendRemark = ref<string>('');
 const applyId = ref<number>(useUserStoreHook().userId);
+const applyWindowShow = ref(false);
 
 const selectFriend = debounce((friendId: number) => {
     selectFriendId.value = friendId
@@ -165,6 +167,7 @@ const searchUserFunc = debounce((query: UserQuery) => {
 },300)
 
 const applyFriendFunc = (applyInfo: ApplyFriendDTO) => {
+    applyWindowShow.value = false;
     applyFriend(applyInfo)
 }
 onMounted(() => {

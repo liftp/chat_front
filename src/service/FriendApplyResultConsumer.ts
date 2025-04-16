@@ -4,6 +4,7 @@ import { ApplyFriend, FriendRelationship } from "@/db/model/models"
 import { useUserStoreHook } from "@/store/modules/user"
 import emitter from "@/util/emitter"
 import { ApplyResultInfo } from "@/api/types/relation_ship"
+import { etFriendApply } from "@/constants/emitter_type"
 
 /**
  * 好友申请结果确认通知
@@ -23,7 +24,7 @@ export class FriendApplyResultMsgConsumer implements IMsgConsumer {
         window.electronApi.applyRecordAdd(applyUpdate)
 
         // 触发好友申请记录刷新
-        // emitter.emit(etFriendApply, applyInsert)
+        emitter.emit(etFriendApply, applyResult)
 
     }
 }
