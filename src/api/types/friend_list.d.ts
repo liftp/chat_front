@@ -5,7 +5,8 @@ export interface FriendRelationship {
     friendId: number,
     friendName: string,
     friendRemark: string,
-    selfId: string,
+    type: number,
+    selfId: number,
 }
 
 export interface FriendQuery {

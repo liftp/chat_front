@@ -4,9 +4,18 @@
         <!-- 搜索好友 -->
         <div  style="display: flex;">
             <el-input v-model="searchName" placeholder="请输入好友名称" maxlength="15" throttle="" :prefix-icon="Search" @input="remoteSearch({searchType:1, name:searchName})"></el-input>
-            <el-button ref="searchUserBtn" 
-                :icon="Plus" 
-                class="add_user"></el-button>
+            <el-dropdown placement="bottom">
+
+                <el-button ref="addChatBtn" 
+                    :icon="Plus" 
+                    class="add_user"></el-button>
+                <template #dropdown>
+                    <el-dropdown-menu>
+                        <el-dropdown-item><span ref="searchUserBtn">添加好友</span></el-dropdown-item>
+                        <el-dropdown-item><span ref="addGroupBtn" @click="addGroupWindowShow = true">添加群聊</span></el-dropdown-item>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
         </div>
         <!-- 固定好友申请列表 -->
         <el-card class="new_friend_tab" @click="navSelectHook().friendApplySelect(true)">
@@ -21,6 +30,34 @@
                 {{friend.friendRemark}}--({{friend.friendName}})
             </el-card>
         </div>
+
+        <!-- 选择添加好友、添加群聊弹窗 -->
+        
+        <!-- <el-popover placement="right"
+            :width="200"
+            trigger="click"
+            :virtual-ref="addChatBtn"
+            virtual-triggering
+        >
+            <el-button ref="searchUserBtn" plain>添加好友</el-button>
+            <el-button ref="addGroupBtn" plain>添加群聊</el-button>
+
+        </el-popover> -->
+        <el-popover placement="right"
+            :width="400"
+            trigger="click"
+            :virtual-ref="addGroupBtn"
+            title="添加群聊"
+            :visible="addGroupWindowShow"
+            virtual-triggering
+        >
+            <span>群聊名称</span>
+            <el-input v-model="groupInfo.groupName"></el-input>
+            <span>群公告</span>
+            <el-input v-model="groupInfo.groupRemark"></el-input>
+            <el-button type="primary" style="margin-top: 15px;" @click="addGroupChatFunc">添加</el-button>
+            <el-button style="margin-top: 15px;" @click="addGroupWindowShow = false">取消</el-button>
+        </el-popover>
         
         <!-- 搜索用户弹窗 -->
         <el-popover placement="right" 
@@ -100,7 +137,7 @@
 
 <script lang="ts" setup>
 import { Plus, Search } from '@element-plus/icons-vue'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { applyFriend, friendList } from '@/api/friend_list';
 import { ApplyFriendDTO, FriendQuery, FriendRelationship } from '@/api/types/friend_list';
 import { ElNotification, scrollbarProps } from 'element-plus';
@@ -113,15 +150,26 @@ import { navSelectHook } from '@/store/modules/viewShow';
 import { MainMenu } from '@/constants/TypeEnum';
 import { showControl } from '@/util/menu_control/menu';
 import ApplyFirendRecord from './ApplyFriendRecord.vue';
+import { addGroupChat } from '@/api/group';
+import { GroupInfoDTO, GroupInfoPartial } from '@/api/types/group';
+import emitter from '@/util/emitter';
+import { etAddFriendship } from '@/constants/emitter_type';
 
 
 const searchName = ref<string>('');
 const friendsData = ref<FriendRelationship[]>();
 const selectFriendId = ref<number>(-1);
+// 添加聊天
+const addChatBtn = ref<string>();
+// 添加群聊
+const addGroupBtn = ref<string>();
+// 添加好友
 const searchUserBtn = ref<string>();
 const userList  = ref<UserInfo[]>([]);
 const searchUsername = ref<string>('');
 const searchPopoverVisible = ref<boolean>(false);
+const groupInfo = reactive<GroupInfoPartial>({});
+const addGroupWindowShow = ref(false);
 
 
 // 申请相关信息
@@ -148,6 +196,21 @@ const remoteSearch = (query: FriendQuery) => {
                 title: '异常提示',
                 message: "网络异常",
             })
+        })
+}
+
+function addGroupChatFunc() {
+    addGroupChat(groupInfo)
+        .then(resp => {
+            // 请求成功后添加本地记录
+            const groupInfo = resp.data
+            if (groupInfo) {
+                const friendship = {id: groupInfo.id, friendId: groupInfo.id, friendName: groupInfo.groupName, friendRemark: groupInfo.groupRemark, selfId: useUserStoreHook().userId, type: 2} as FriendRelationship
+                window.electronApi.friendshipAdd(friendship)
+                emitter.emit(etAddFriendship, friendship);
+            }
+            // 刷新
+            addGroupWindowShow.value = false
         })
 }
 

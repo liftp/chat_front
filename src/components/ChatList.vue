@@ -5,15 +5,58 @@
 				:key="friend.friendId">
 				<el-card class="friend-info" 
 					:class="friend.friendId === useCurrentChatHook().chatUserId && friend.type == useCurrentChatHook().chatType ? 'select_bgc' : ''"
-					@click="choiceFriendChat(friend.friendId, friend.type)">
+					@click="choiceFriendChat(friend.friendId, friend.type)"
+					>
 					<template v-if="friend.type === 2">
-						[群聊]
+						<el-dropdown trigger="contextmenu" placement="bottom">
+							<div ref="groupOperation">
+								[群聊]
+								{{friend.friendName}}
+							</div>
+							<template #dropdown>
+								<el-dropdown-menu>
+									<el-dropdown-item>
+										<span @click="addGroupClick(friend.friendId)">添加成员</span>
+									</el-dropdown-item>
+									<el-dropdown-item>
+										<span>修改公告</span>
+									</el-dropdown-item>
+								</el-dropdown-menu>
+								
+							</template>
+						</el-dropdown>
+							
 					</template>
-					{{friend.friendRemark}}
+					<template v-if="friend.type !== 2">
+						<div>
+							{{friend.friendRemark}}
+						</div>
+					</template>
 				</el-card>
-			<!-- <el-card class="friend-info"  shadow="hover">Hover</el-card>
-			<el-card class="friend-info"  shadow="never">Never</el-card> -->
+
+				<div>
+
+					<el-dialog v-model="groupAddUserDialogShow" 
+						title="添加用户" 
+						width="500">
+						<el-checkbox-group v-model="checkFriends">
+							<template v-for="friend in friendsData"> 
+								<el-checkbox style="display: block; text-align: left; margin-left: 30px;" 
+									:label="friend.friendName" 
+									:value="friend.id"
+									:disabled="checkGroupIsContainsMember(friend.id)"
+									/>
+							</template>
+						</el-checkbox-group>
+						<template #footer>
+							<el-button type="primary" @click="groupMembersAdd">添加</el-button>
+							<el-button @click="groupAddUserDialogShow = false">取消</el-button>
+						</template>
+					</el-dialog>
+				</div>
 			</div>
+			
+
 		</el-aside>
 		<el-main class="chat-right">
 			<MsgShowAndSend :style="showControl(() => useCurrentChatHook().chatUserId != -1)"/>
@@ -35,10 +78,24 @@ import { showControl } from '@/util/menu_control/menu';
 
 import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
 import { etAddFriendship } from '@/constants/emitter_type';
+import { FriendQuery, FriendRelationship } from '@/api/types/friend_list';
+import { friendList } from '@/api/friend_list';
+import { ElNotification } from 'element-plus';
+import { findGroupMemberById, groupMemebersAddApi } from '@/api/group';
+import { GroupMemberVO } from '@/api/types/group';
+import { error } from 'console';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
+const groupOperation = ref<string>();
 const host = window.location.host;
 const sendWsMsgEventType = "sendWsMsg"
+// 好友列表，用于添加到群聊的展示
+const friendsData = ref<FriendRelationship[]>();
+const checkFriends = ref<number[]>([]);
+const groupAddUserDialogShow = ref<boolean>(false);
+const groupMembers = ref<GroupMemberVO[]>([]);
+const checkGrouId = ref<number>(-1);
+
 
 // 先从本地加载好友列表
 onMounted(() => {
@@ -93,8 +150,48 @@ onMounted(() => {
 					})
 				})
 		})
+		remoteSearch({name:'', searchType:1})
 	
 })
+
+const remoteSearch = (query: FriendQuery) => {
+    friendList(query)
+        .then(friends => {
+            friendsData.value = friends.data;
+            console.log(friends.data)
+        })
+        .catch(err => {
+            ElNotification({
+                title: '异常提示',
+                message: "网络异常",
+            })
+        })
+}
+
+const findGroupMember = (groupId: number) => {
+	return findGroupMemberById(groupId)
+	
+}
+
+const addGroupClick = (groupId: number) => {
+	checkGrouId.value = groupId
+	findGroupMember(groupId)
+		.then(resp => {
+			groupMembers.value = resp.data
+			// 拿到数据后展示dialog
+			groupAddUserDialogShow.value = true;
+		})
+		.catch(err => {
+			ElNotification({
+                title: '异常提示',
+                message: "获取群组成员失败",
+            })
+		})
+}
+
+const checkGroupIsContainsMember = (memberId: number) => {
+	return !(groupMembers.value.filter(e => e.groupId == memberId).length == 0)
+}
 
 onUnmounted(() => {
     closeWebSocket()
@@ -117,6 +214,11 @@ const choiceFriendChat = (friendId: number, chatType: number) => {
 	chatHook.setChatType(chatType)
 
 
+}
+
+const groupMembersAdd = () => {
+	groupMemebersAddApi({groupId: checkGrouId.value, userIds: checkFriends.value})
+	groupAddUserDialogShow.value = false
 }
 
 

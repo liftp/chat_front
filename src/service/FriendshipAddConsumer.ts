@@ -13,7 +13,7 @@ export class FriendshipAddConsumer implements IMsgConsumer {
         // 作为好友信息
         console.log("好友关系添加")
         const friendship = JSON.parse(msg) as FriendRelationship
-        window.electronApi.friendshipAdd({...friendship, selfId: useUserStoreHook().userId})
+        window.electronApi.friendshipAdd({...friendship, selfId: useUserStoreHook().userId, type: 1})
         // 触发好友列表更新
         emitter.emit(etAddFriendship, {...friendship, type: 1});
     };

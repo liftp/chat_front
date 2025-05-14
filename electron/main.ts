@@ -72,7 +72,7 @@ app.whenReady().then(() => {
     await updateRecord(data);
   })
   ipcMain.handle('friendship-add', async (event, data: FriendRelationship) => {
-    await saveFriendship({...data, type: 1});
+    await saveFriendship({...data});
   })
 
   createWindow()

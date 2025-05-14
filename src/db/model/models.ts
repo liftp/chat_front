@@ -40,6 +40,7 @@ export interface FriendRelationship {
     friendName: string,
     friendRemark: string,
     selfId: number,
+    type: number,
 }
 
 export interface ApplyFriend {
