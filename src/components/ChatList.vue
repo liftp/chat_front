@@ -43,7 +43,7 @@
 							<template v-for="friend in friendsData"> 
 								<el-checkbox style="display: block; text-align: left; margin-left: 30px;" 
 									:label="friend.friendName" 
-									:value="friend.id"
+									:value="friend.friendId"
 									:disabled="checkGroupIsContainsMember(friend.id)"
 									/>
 							</template>
@@ -205,14 +205,13 @@ const choiceFriendChat = (friendId: number, chatType: number) => {
 	const chatHook = useCurrentChatHook()
 	console.log("choice friend:", friendId, "chatType:", chatType)
 	// 当前用户不操作
-	if (friendId !== chatHook.chatUserId) {
+	if (friendId !== chatHook.chatUserId || chatHook.chatType !== chatType) {
 		// 清理当前窗口聊天记录
 		emitter.emit("cleanMsg")
 		
+		chatHook.setChatType(chatType)
+		chatHook.choiceUserChat(friendId)
 	}
-	chatHook.choiceUserChat(friendId)
-	chatHook.setChatType(chatType)
-
 
 }
 

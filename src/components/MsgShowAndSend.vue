@@ -6,6 +6,7 @@
                         <el-scrollbar height="100%">
                             <div  v-for="(line, index) in chatRecords" :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'" :key="index" style="margin-top: 10px;">
                                 <template v-if="line.sendUserId !== currentUserId">
+                                    <!-- <span>{{ useCurrentChatHook() }}</span> -->
                                     <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
                                 </template>
                                 <template v-if="line.sendUserId === currentUserId">
