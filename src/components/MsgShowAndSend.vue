@@ -1,6 +1,22 @@
 <template>
     
-        <el-container style="height: 78dvh;">
+    <div style="width: 100%; height: 10dvh;"> 
+        
+        <el-container style="height: 78dvh; ">
+                <el-header style="margin-left:0px;height: 32px;  width: 100%; ">
+                    <div style="display: flex;justify-content: space-between; margin-top: 5px;">
+                        <span style="margin-left: 0px;">{{ friend.type === 2 ? friend.friendName : friend.friendRemark }}</span>
+                        <span ><el-button icon="MoreFilled" size="small" type="" @click="friend.type === 2 ? groupMembersQuery(friend.friendId) : ''" text></el-button></span>
+                    </div>
+                    <el-drawer v-model="drawerOpt" direction="rtl" :title="friend.type === 2 ? friend.friendName : friend.friendRemark">
+                        <div style="flex: auto;text-align: left;">
+                            <div v-for="member in groupMembers" style="float: left;">
+                                <span style="text-overflow: ellipsis; width: 40px;display: block;overflow: hidden;">{{ member.memberRemark }}</span>
+                            </div> 
+                        </div>
+                    </el-drawer>
+                    <el-divider style="margin-top: 5px;"/>
+                </el-header>
                 <el-main>
                     <div id="chatBox" ref="msg_arr" class="chat-msg-box" @scroll="scroll_msg_box">
                         <el-scrollbar height="100%">
@@ -35,18 +51,24 @@
                     </el-container>
                 </el-footer>
         </el-container>
+    </div>
 </template>
 
 <script lang="ts" setup>
 import {watchEffect, ref, Ref, onUnmounted, onMounted} from 'vue'
 import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user'
 import emitter from '@/util/emitter'
-import { ChatRecord, ChatRecordSearch } from '@/db/model/models'
+import { ChatRecord, ChatRecordSearch, FriendList } from '@/db/model/models'
 import {formatDate} from '@/script/DateUtil'
+import { findGroupMemberById } from '@/api/group'
+import { GroupMemberVO } from '@/api/types/group'
+import { ElNotification } from 'element-plus'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
 const currentUserId:number =  useUserStoreHook().userId;
+const drawerOpt = ref(false);
+const groupMembers = ref<GroupMemberVO[]>()
 
 
 const host = window.location.host;
@@ -56,6 +78,26 @@ let startDateTime = -1
 watchEffect(() => {
     upglide()
 })
+
+withDefaults(defineProps<{friend?: FriendList}>(), {
+    friend: () => {
+        return {friendId: -1, friendName: '', friendRemark: '', selfId: -1, type: 2}
+    }
+})
+
+const groupMembersQuery = (groupId: number) => {
+    findGroupMemberById(groupId)
+        .then(resp => {
+            groupMembers.value = resp.data
+            drawerOpt.value = true
+        })
+        .catch(err => {
+            ElNotification({
+                title: '异常提示',
+                message: "获取群组成员失败",
+            })
+        })
+}
 
 /**
  * 上滑滚动条，查询历史聊天记录

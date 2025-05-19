@@ -58,8 +58,10 @@
 			
 
 		</el-aside>
-		<el-main class="chat-right">
-			<MsgShowAndSend :style="showControl(() => useCurrentChatHook().chatUserId != -1)"/>
+		<el-main class="chat-right" style="padding-left: 0px; padding-right: 0px; padding-top: 0px;">
+			<MsgShowAndSend :style="showControl(() => useCurrentChatHook().chatUserId != -1)"
+				:friend="useCurrentChatHook().chatUserId == -1 ? {friendId: -1, friendName: '', friendRemark: '', selfId: -1, type: 2} : friendsLocal.filter(e => e.friendId === useCurrentChatHook().chatUserId && e.type === useCurrentChatHook().chatType)[0]"
+			/>
 		</el-main>
 
 </template>
