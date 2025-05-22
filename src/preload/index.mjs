@@ -28,6 +28,16 @@ const friendshipAdd = async (data) => {
 	await ipcRenderer.invoke('friendship-add', data)
 }
 
+const delMembersByGroupId = async (groupId, selfId) => {
+	await ipcRenderer.invoke('del-members-by-group-id', groupId, selfId)
+}
+const saveGroupMembersLocal = async (data) => {
+	await ipcRenderer.invoke('save-group-members-local', data)
+}
+const findGroupMembers = async (groupId, selfId) => {
+	return await ipcRenderer.invoke('find-group-members', groupId, selfId)
+}
+
 
 contextBridge.exposeInMainWorld('electronApi', {
 	readRecord,
@@ -38,4 +48,7 @@ contextBridge.exposeInMainWorld('electronApi', {
 	applyRecordAdd,
 	applyRecordUpdate,
 	friendshipAdd,
+	findGroupMembers,
+	saveGroupMembersLocal,
+	delMembersByGroupId,
 })

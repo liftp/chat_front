@@ -15,8 +15,8 @@
 							</div>
 							<template #dropdown>
 								<el-dropdown-menu>
-									<el-dropdown-item>
-										<span @click="addGroupClick(friend.friendId)">添加成员</span>
+									<el-dropdown-item  @click="addGroupClick(friend.friendId)">
+										<span>添加成员</span>
 									</el-dropdown-item>
 									<el-dropdown-item>
 										<span>修改公告</span>
@@ -60,16 +60,18 @@
 		</el-aside>
 		<el-main class="chat-right" style="padding-left: 0px; padding-right: 0px; padding-top: 0px;">
 			<MsgShowAndSend :style="showControl(() => useCurrentChatHook().chatUserId != -1)"
-				:friend="useCurrentChatHook().chatUserId == -1 ? {friendId: -1, friendName: '', friendRemark: '', selfId: -1, type: 2} : friendsLocal.filter(e => e.friendId === useCurrentChatHook().chatUserId && e.type === useCurrentChatHook().chatType)[0]"
+				:friend="useCurrentChatHook().chatUserId == -1 ? 
+					reactive({friendId: -1, friendName: '', friendRemark: '', selfId: -1, type: 3}) : 
+					reactive(friendsLocal.filter(e => e.friendId === useCurrentChatHook().chatUserId && e.type === useCurrentChatHook().chatType)[0])"
 			/>
 		</el-main>
 
 </template>
 <script setup lang="ts">
-import { ChatRecord, FriendList } from '@/db/model/models';
+import { ChatRecord, FriendList, GroupMember } from '@/db/model/models';
 // import { getCookie } from '@/util/cache/cookies';
 import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user';
-import { onMounted, onUnmounted, Ref, ref, watchEffect } from 'vue';
+import { onMounted, onUnmounted, reactive, Ref, ref, watchEffect } from 'vue';
 import {connectWebsocket, closeWebSocket, sendWsMsg} from '../ws/WebSocketServer'
 import emitter from '@/util/emitter';
 import { selectNotReadMsg } from '@/api/msg';
@@ -83,9 +85,8 @@ import { etAddFriendship } from '@/constants/emitter_type';
 import { FriendQuery, FriendRelationship } from '@/api/types/friend_list';
 import { friendList } from '@/api/friend_list';
 import { ElNotification } from 'element-plus';
-import { findGroupMemberById, groupMemebersAddApi } from '@/api/group';
+import {  findGroupMemberById, groupMemebersAddApi } from '@/api/group';
 import { GroupMemberVO } from '@/api/types/group';
-import { error } from 'console';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const groupOperation = ref<string>();
@@ -97,6 +98,8 @@ const checkFriends = ref<number[]>([]);
 const groupAddUserDialogShow = ref<boolean>(false);
 const groupMembers = ref<GroupMemberVO[]>([]);
 const checkGrouId = ref<number>(-1);
+const groupMemberLocal = ref<GroupMember[]>([]);
+const groupChatRecordShow = ref(false)
 
 
 // 先从本地加载好友列表

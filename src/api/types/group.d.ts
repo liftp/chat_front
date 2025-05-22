@@ -14,6 +14,8 @@ export interface GroupInfoDTO {
     // @Schema(description = "群进入密码")
     groupLockPwd: string,
 
+    status: number, // 成员群组中状态 0: 在群聊中 1: 离开群聊
+
     // @Schema(description = "群组所属人id")
     selfId?: number,
 }

@@ -19,23 +19,33 @@
                 </el-header>
                 <el-main>
                     <div id="chatBox" ref="msg_arr" class="chat-msg-box" @scroll="scroll_msg_box">
-                        <el-scrollbar height="100%">
-                            <div  v-for="(line, index) in chatRecords" :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'" :key="index" style="margin-top: 10px;">
-                                <template v-if="line.sendUserId !== currentUserId">
-                                    <!-- <span>{{ useCurrentChatHook() }}</span> -->
-                                    <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
-                                </template>
-                                <template v-if="line.sendUserId === currentUserId">
-                                    <div class="item item-right-child">{{line.content}}</div><div class="bubble-triangle bubble-triangle-left"></div>
-                                </template>
-                            </div>
-                        </el-scrollbar>
+                        <template v-if="delayShow">
+                            <el-scrollbar height="100%">
+                                <div  v-for="(line, index) in chatRecords"  :key="index" style="margin-top: 10px;">
+                                    <template v-if="line.sendUserId !== currentUserId">
+                                        <template v-if="friend.type === 2">
+                                            <div>
+                                                <span style="font-size: 12px;">{{ groupMembersLocal?.get(line.friendId)?.memberRemark }}</span>
+                                            </div>
+                                        </template>
+                                        <div :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'">
+                                            <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
+                                        </div>
+                                    </template>
+                                    <template v-if="line.sendUserId === currentUserId">
+                                        <div class='item-right'>
+                                            <div class="item item-right-child">{{line.content}}</div><div class="bubble-triangle bubble-triangle-left"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </el-scrollbar>
+                        </template>
                     </div>
                 </el-main>
 
                 <el-footer >
                     <el-divider/>
-                    <el-input v-model="inputText" class="chat-input" placeholder="请输入内容" type="textarea" resize="none" :autosize="{minRows:4, maxRows: 4}"/>
+                    <el-input v-model="inputText" class="chat-input" :disabled="!delayShow" placeholder="请输入内容" type="textarea" resize="none" :autosize="{minRows:4, maxRows: 4}"/>
                     <el-container style="justify-content: end;">
                     
                         <el-button
@@ -55,20 +65,25 @@
 </template>
 
 <script lang="ts" setup>
-import {watchEffect, ref, Ref, onUnmounted, onMounted} from 'vue'
+import {watchEffect, ref, Ref, onUnmounted, onMounted, watch, computed} from 'vue'
 import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user'
 import emitter from '@/util/emitter'
-import { ChatRecord, ChatRecordSearch, FriendList } from '@/db/model/models'
+import { ChatRecord, ChatRecordSearch, FriendList, GroupMember } from '@/db/model/models'
 import {formatDate} from '@/script/DateUtil'
-import { findGroupMemberById } from '@/api/group'
+import { findAllGroupMemberById, findGroupMemberById } from '@/api/group'
 import { GroupMemberVO } from '@/api/types/group'
 import { ElNotification } from 'element-plus'
+import { HashMap } from '@/util/common/HashMap'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
 const currentUserId:number =  useUserStoreHook().userId;
 const drawerOpt = ref(false);
+// 右侧抽屉的成员信息
 const groupMembers = ref<GroupMemberVO[]>()
+// 本地存储的成员信息
+const groupMembersLocal = ref<HashMap<number, GroupMember>>()
+const delayShow = ref(false)
 
 
 const host = window.location.host;
@@ -79,9 +94,19 @@ watchEffect(() => {
     upglide()
 })
 
-withDefaults(defineProps<{friend?: FriendList}>(), {
+const props = withDefaults(defineProps<{friend?: FriendList}>(), {
     friend: () => {
-        return {friendId: -1, friendName: '', friendRemark: '', selfId: -1, type: 2}
+        return {friendId: -1, friendName: '', friendRemark: '', selfId: -1, type: -1}
+    }
+})
+
+watch(() => props.friend, (newVal, oldVal) =>{
+    console.log("watch props")
+    if (props.friend.type === 2) {
+        delayShow.value = false
+        groupMemberInfoPull(props.friend.friendId)
+    } else if (props.friend.type === 1) {   
+        delayShow.value = true
     }
 })
 
@@ -177,6 +202,49 @@ function sendMsg() {
     chatRecords.value.push(record)
     // clear msg window
     inputText.value = ""
+}
+
+const groupMemberInfoPull = (groupId: number) => {
+	// 查询群组的成员信息，最后拉取时间超过1小时，再去拉取，防止频繁获取
+	const thisUser = useUserStoreHook().userId
+	window.electronApi.findGroupMembers(groupId, thisUser)
+		.then(members => {
+                // console.log(members)
+				const outOfHour = !members || (new Date().getTime() - members[0].lastPullTime) > (3600 * 1000);
+                // if (members) {
+                //     console.log("上次拉取时间", new Date().getTime() - members[0].lastPullTime)
+                // }
+				if (outOfHour) {
+					findAllGroupMemberById(groupId)
+						.then(memNew => {
+							// 删掉旧的
+							window.electronApi.delMembersByGroupId(groupId, thisUser)
+							const currTime = new Date().getTime()
+							const memLocal: GroupMember[] = [];
+							memNew.data.forEach(mem => {
+								const ele = {...mem, lastPullTime: currTime, selfId: thisUser} as GroupMember
+								memLocal.push(ele)
+							})
+							// 添加新的
+							window.electronApi.saveGroupMembersLocal(memLocal)
+							// 刷新聊天记录
+                            const localMap = new HashMap<number, GroupMember>();
+                            memLocal.forEach(m => {
+                                localMap.set(m.memberId, m)
+                            })
+                            groupMembersLocal.value = localMap
+						})
+				} else {
+                    const localMap = new HashMap<number, GroupMember>();
+                    members.forEach(m => {
+                        localMap.set(m.memberId, m)
+                    })
+                    groupMembersLocal.value = localMap
+                }
+                delayShow.value = true
+			}
+		)
+	
 }
 
 </script>

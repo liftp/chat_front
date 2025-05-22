@@ -5,11 +5,12 @@ import process from 'process'
 import { fileURLToPath } from 'url'
 
 // 预加载ESM模块
+import {findGroupMembersLocal, saveGroupMembersLocal, delMembersByGroupIdLocal} from '../src/db/service/GroupMemberService'
 import {readRecord, countRecord, saveRecord} from '../src/db/service/ChatRecordService'
 import { findFriend, saveRecord as saveFriendship } from '../src/db/service/FriendListService'
 import { recordList, updateRecord } from '../src/db/service/ApplyFriendService'
 import {saveRecord as saveApplyFriend} from "../src/db/service/ApplyFriendService"
-import { ApplyFriend, ChatRecord, FriendRelationship } from '../src/db/model/models'
+import { ApplyFriend, ChatRecord, FriendRelationship, GroupMember } from '../src/db/model/models'
 // import('./preload/preload.mjs')
 const __filenameNew = fileURLToPath(import.meta.url)
 
@@ -73,6 +74,15 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('friendship-add', async (event, data: FriendRelationship) => {
     await saveFriendship({...data});
+  })
+  ipcMain.handle('del-members-by-group-id', async (event, groupId: number, selfId: number) => {
+    await delMembersByGroupIdLocal(groupId, selfId);
+  })
+  ipcMain.handle('save-group-members-local', async (event, data: GroupMember[]) => {
+    await saveGroupMembersLocal(data);
+  })
+  ipcMain.handle('find-group-members', async (event, groupId: number, selfId: number) => {
+    return await findGroupMembersLocal(groupId, selfId);
   })
 
   createWindow()

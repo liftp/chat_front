@@ -19,6 +19,16 @@ export function findGroupMemberById(groupId: number) {
     })
 }
 
+export function findAllGroupMemberById(groupId: number) {
+    return request<GroupMembersResp>({
+        url: "groupInfo/findAllGroupMemberById",
+        method: 'get',
+        params: {
+            groupId
+        }
+    })
+}
+
 export function groupMemebersAddApi(groupMemberAdd: GroupMemberAddDTO) {
     return request<GroupMembersAddResp>({
         url: "groupInfo/addGroupMembers",

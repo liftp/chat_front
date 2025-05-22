@@ -55,3 +55,28 @@ export interface ApplyFriend {
     applyPassDesc?: string,
     selfId: number,
 }
+
+export interface GroupMember {
+        // id
+        id: number,
+
+        // 群组id
+        groupId: number,
+    
+        // 好友id
+        memberId: number,
+    
+        // 好友名称
+        memberName: string,
+    
+        // 群内备注
+        memberRemark: string,
+    
+        // 邀请人
+        inviteId: number,
+        // 所属
+        selfId: number,
+
+        // 最后一次拉取成员信息时间，用于控制拉取频率
+        lastPullTime: number,
+}
