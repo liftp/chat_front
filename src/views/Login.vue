@@ -58,7 +58,7 @@ const resetForm = (formEl: FormInstance | undefined) => {
 <template>
     <el-form
         ref="ruleFormRef"
-        style="max-width: 600px"
+        style="max-width: 300px;"
         :model="loginForm"
         status-icon
         :rules="rules"

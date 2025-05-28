@@ -15,6 +15,7 @@ export class ChatMsgConsume implements IMsgConsumer {
         const msg: ChatRecord = JSON.parse(msgStr)
         msg.saveType = "1";
         msg.selfId = useUserStoreHook().userId;
+        // msg.friendId = msg.chatType === 2 ? msg.receiveUserId : msg.sendUserId;
         window.electronApi.writeMsg(msg)
         // 判断是不是在当前聊天，然后展示
         if (msg.friendId === useCurrentChatHook().chatUserId && msg.chatType === useCurrentChatHook().chatType) {

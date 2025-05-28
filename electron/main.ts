@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 
 // 预加载ESM模块
 import {findGroupMembersLocal, saveGroupMembersLocal, delMembersByGroupIdLocal} from '../src/db/service/GroupMemberService'
-import {readRecord, countRecord, saveRecord} from '../src/db/service/ChatRecordService'
+import {readRecord, countRecord, saveRecord, selectGroupWithMaxMsgId} from '../src/db/service/ChatRecordService'
 import { findFriend, saveRecord as saveFriendship } from '../src/db/service/FriendListService'
 import { recordList, updateRecord } from '../src/db/service/ApplyFriendService'
 import {saveRecord as saveApplyFriend} from "../src/db/service/ApplyFriendService"
@@ -83,7 +83,11 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('find-group-members', async (event, groupId: number, selfId: number) => {
     return await findGroupMembersLocal(groupId, selfId);
+  })  
+  ipcMain.handle('select-group-with-max-msg-id', async (event, selfId: number) => {
+    return await selectGroupWithMaxMsgId(selfId);
   })
+  
 
   createWindow()
   app.on('activate', function () {

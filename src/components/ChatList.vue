@@ -74,7 +74,7 @@ import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user';
 import { onMounted, onUnmounted, reactive, Ref, ref, watchEffect } from 'vue';
 import {connectWebsocket, closeWebSocket, sendWsMsg} from '../ws/WebSocketServer'
 import emitter from '@/util/emitter';
-import { selectNotReadMsg } from '@/api/msg';
+import { GroupNotReadMsgQuery, selectGroupNotReadMsg, selectNotReadMsg, SingleGroupParam } from '@/api/msg';
 import { container } from '@/config/inject_container.config';
 import { IMsgConsumer } from '@/service/IMsgConsumer';
 import SERVICE_IDENTIFIES from '@/constants/identifiers';
@@ -135,7 +135,7 @@ onMounted(() => {
 	emitter.on(etAddFriendship, (val) => {
 		friendsLocal.value.push(val as FriendList)
     })
-	// 拉取未读消息,应该同步于消息展示之前(加载好友列表之前即可)
+	// 拉取单聊的所有未读消息,应该同步于消息展示之前(加载好友列表之前即可)
 	selectNotReadMsg()
 		.then((docs) => {
 			if (docs != null && docs.data != null) {
@@ -155,7 +155,32 @@ onMounted(() => {
 					})
 				})
 		})
-		remoteSearch({name:'', searchType:1})
+	remoteSearch({name:'', searchType:1})
+	// 拉取群聊的所有未读消息
+	window.electronApi.selectGroupWithMaxMsgId(useUserStoreHook().userId)
+		.then(docs => {
+			const groupList: SingleGroupParam[] = []
+			const pullGroupChatQuery: GroupNotReadMsgQuery = {groupList}
+			console.log("分组查询群组最后聊天内容:{}", docs)
+			docs.forEach(doc => {
+				if (doc.msgId) {
+					groupList.push({groupId: doc.friendId, msgId: doc.msgId})
+				}
+			})
+			selectGroupNotReadMsg(pullGroupChatQuery)
+				.then(resp => {
+					if (resp && resp.data && resp.data.length > 0) {
+						resp.data.forEach(element => {
+							if (element.groupId) {
+								element.selfId = element.receiveUserId
+								element.friendId = element.groupId
+								element.dateTime = Number(element.dateTime)
+								window.electronApi.writeMsg(element)
+							}
+						})
+					}
+				})
+		})
 	
 })
 

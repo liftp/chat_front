@@ -12,6 +12,7 @@ export interface ElectronApi {
     findGroupMembers: (groupId: number, selfId: number) => Promise<GroupMember[]>;
     saveGroupMembersLocal: (members: GroupMember[]) => Promise<void>;
     delMembersByGroupId: (groupId: number, selfId: number) => Promise<void>;
+    selectGroupWithMaxMsgId: (selfId: number) => Promise<ChatRecord[]>;
 }
 
 declare global {

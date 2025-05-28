@@ -25,7 +25,7 @@
                                     <template v-if="line.sendUserId !== currentUserId">
                                         <template v-if="friend.type === 2">
                                             <div>
-                                                <span style="font-size: 12px;">{{ groupMembersLocal?.get(line.friendId)?.memberRemark }}</span>
+                                                <span style="font-size: 12px;">{{ groupMembersLocal?.get(line.sendUserId)?.memberRemark }}</span>
                                             </div>
                                         </template>
                                         <div :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'">
@@ -74,6 +74,7 @@ import { findAllGroupMemberById, findGroupMemberById } from '@/api/group'
 import { GroupMemberVO } from '@/api/types/group'
 import { ElNotification } from 'element-plus'
 import { HashMap } from '@/util/common/HashMap'
+import { sendMsgToServer } from '@/api/msg'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
@@ -195,13 +196,19 @@ function sendMsg() {
         friendId: receiveUserId, content: inputText.value, 
         dateTime: dateTime.getTime(), createdAt};
     console.log(record)
-    window.electronApi.writeMsg({...record, selfId: currentUserId})
     // send msg to server 
-    emitter.emit("sendWsMsg", {...record, msgType: 2, groupId: chatType == 2 ? receiveUserId : -1, chatType})
-    // record to add current chat window
-    chatRecords.value.push(record)
-    // clear msg window
-    inputText.value = ""
+    // 这里自己发送的消息，为了在响应的时候拿到该数据的id，所以使用http请求，从返回值拿发送人的那条数据信息
+    sendMsgToServer({...record, msgType: 2, groupId: chatType == 2 ? receiveUserId : -1, chatType})
+        .then(msgResp => {
+            const msgWrap = msgResp.data
+            // save to local db
+            window.electronApi.writeMsg({...msgWrap, selfId: currentUserId, friendId: receiveUserId, chatType})
+            // record to add current chat window
+            chatRecords.value.push(record)
+            // clear msg window
+            inputText.value = ""
+        })
+    // emitter.emit("sendWsMsg", {...record, msgType: 2, groupId: chatType == 2 ? receiveUserId : -1, chatType})
 }
 
 const groupMemberInfoPull = (groupId: number) => {
@@ -210,7 +217,7 @@ const groupMemberInfoPull = (groupId: number) => {
 	window.electronApi.findGroupMembers(groupId, thisUser)
 		.then(members => {
                 // console.log(members)
-				const outOfHour = !members || (new Date().getTime() - members[0].lastPullTime) > (3600 * 1000);
+				const outOfHour = !members || members.length == 0 || (new Date().getTime() - members[0].lastPullTime) > (3600 * 1000);
                 // if (members) {
                 //     console.log("上次拉取时间", new Date().getTime() - members[0].lastPullTime)
                 // }
