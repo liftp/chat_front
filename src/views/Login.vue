@@ -56,29 +56,32 @@ const resetForm = (formEl: FormInstance | undefined) => {
 </script>
 
 <template>
-    <el-form
-        ref="ruleFormRef"
-        style="max-width: 300px;"
-        :model="loginForm"
-        status-icon
-        :rules="rules"
-        label-width="200px"
-        class="demo-ruleForm"
-    >
-        <el-form-item label="用户名" prop="username">
-            <el-input v-model="loginForm.username" type="text" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="密码" prop="password">
-            <el-input v-model="loginForm.password" type="password" autocomplete="off" />
-        </el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="submitForm(ruleFormRef)">
-                登录
-            </el-button>
-            <el-button @click="resetForm(ruleFormRef)">
-                重置
-            </el-button>
-        </el-form-item>
-    </el-form>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <el-form
+            ref="ruleFormRef"
+            style="max-width: 400px;"
+            :model="loginForm"
+            status-icon
+            :rules="rules"
+            label-width="200px"
+            class="demo-ruleForm"
+        >
+            <el-form-item label="用户名" label-width="100px" prop="username">
+                <el-input v-model="loginForm.username" type="text" autocomplete="off" />
+            </el-form-item>
+            <el-form-item label="密码"  label-width="100px" prop="password">
+                <el-input v-model="loginForm.password" type="password" autocomplete="off" />
+            </el-form-item>
+                <div style="display: flex; justify-content: center;">
+                    <el-button type="primary" @click="submitForm(ruleFormRef)">
+                        登录
+                    </el-button>
+                    <el-button @click="resetForm(ruleFormRef)">
+                        重置
+                    </el-button>
+                </div>
+
+        </el-form>
+    </div>
 </template>
 

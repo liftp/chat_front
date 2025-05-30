@@ -7,6 +7,7 @@ let wsCreateHandler: NodeJS.Timeout;
 let messageCallback: Function;
 let errorCallback: Function;
 let sendDatas = {};
+let userId;
 
 export const connectWebsocket = (url: string, agentData: {}, successCallback: Callback, errCallback: Callback) => {
     // 上次使用未关闭，创建前关闭下
