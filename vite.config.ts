@@ -31,37 +31,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       strictPort: false,
       /** 接口代理 */
       proxy: {
-        "/api/v1/ws/": {
-          target: "ws://localhost:7891/",
-          ws: true,
-          /** 替换掉代理路径  */
-          rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\//, '/'),
-          /** 是否允许跨域 */
-          changeOrigin: true,
-          configure: (proxy1) => {
-            // const server = http.createServer((req, res) => {
-            //   const { pathname, search } = new URL(req.url!, `http://${req.headers.host}`)
-            //   const proxyReq = createProxyMiddleware({
-            //     target: 'ws://localhost:7891/',
-            //     changeOrigin: true, 
-            //     pathRewrite: {'^\/api\/v1\/ws\/\d+\/': '/'},
-            //     onProxyReq: (proxyReq, req, res) => {
-            //       proxyReq.setHeader('', )
-            //     }
-            //   })(req, res);
-            // })
-
-            // vitePrpxy.on('proxyReq', (proxyReq, req, res) => {
-            //   // 从ws 请求url上截取用户id 
-            //   console.log("ws proxy path : ", proxyReq.path)
-            //   // const idx = proxyReq.path.indexOf('/api/v1/ws/');
-            //   // const findIdx =  req.url!.indexOf("/", idx + '/api/v1/ws/'.length)
-            //   // const userId = req.url!.substring('/api/v1/ws/'.length - 1, findIdx)
-            //   proxyReq.setHeader('http_user_instance', "userId")
-            // })
-          } 
-          
-        },
+        
         "/api/v1/": {
           target: "http://localhost:9001/",
           ws: true,
@@ -87,6 +57,39 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       
       electron({
           entry: './electron/main.ts',
+      }),
+      vitePrpxy({
+        "/api/v1/ws/": {
+          target: "ws://localhost:7891/",
+          ws: true,
+          /** 替换掉代理路径  */
+          rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\//, '/'),
+          /** 是否允许跨域 */
+          changeOrigin: true,
+          configure: (proxy, options) => {
+            // const server = http.createServer((req, res) => {
+            //   const { pathname, search } = new URL(req.url!, `http://${req.headers.host}`)
+            //   const proxyReq = createProxyMiddleware({
+            //     target: 'ws://localhost:7891/',
+            //     changeOrigin: true, 
+            //     pathRewrite: {'^\/api\/v1\/ws\/\d+\/': '/'},
+            //     onProxyReq: (proxyReq, req, res) => {
+            //       proxyReq.setHeader('', )
+            //     }
+            //   })(req, res);
+            // })
+
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              // 从ws 请求url上截取用户id 
+              console.log("ws proxy path : ", proxyReq.path)
+              // const idx = proxyReq.path.indexOf('/api/v1/ws/');
+              // const findIdx =  req.url!.indexOf("/", idx + '/api/v1/ws/'.length)
+              // const userId = req.url!.substring('/api/v1/ws/'.length - 1, findIdx)
+              proxyReq.setHeader('http_user_instance', "userId")
+            })
+          } 
+          
+        },
       })
     ],
   }
