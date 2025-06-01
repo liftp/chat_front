@@ -62,7 +62,7 @@ import {db} from '../NeDB'
                     if (err != null) {
                         reject(err)
                     }
-                    console.log("group all chat msg:", docs)
+                    // console.log("group all chat msg:", docs)
                     docs.forEach(doc => {
                         
                         if (arrGroup.indexOf(doc.friendId) === -1) {

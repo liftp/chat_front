@@ -4,7 +4,8 @@ import electron from 'vite-plugin-electron'
 import { type ConfigEnv, type UserConfigExport, loadEnv } from "vite"
 // import http from 'http'
 // import { createProxyMiddleware } from 'http-proxy-middleware'
-import { proxy as vitePrpxy } from 'vite-plugin-proxy';
+// import { httpProxy } from 'http-proxy-middleware';
+// import { proxy } from 'vite-plugin-proxy';
 
 // https://vitejs.dev/config/
 export default ({ mode }: ConfigEnv): UserConfigExport => {
@@ -31,10 +32,31 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       strictPort: false,
       /** 接口代理 */
       proxy: {
-        
+        "/api/v1/ws/": {
+          target: "ws://localhost:8001/",
+          ws: true,
+          /** 替换掉代理路径  */
+          // rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\/, '/'),
+          /** 是否允许跨域 */
+          changeOrigin: true,
+          // headers: {
+          //   'X-User-route': `${}`
+          // },
+          configure: (proxy, options) => {
+            // ws 使用 proxyReqWs 事件
+            proxy.on('proxyReqWs', (proxyReqWs, req, res) => {
+              console.log("replace before", req.url!)
+              const preLen = "/api/v2/ws/".length
+              const userIdIdx = req.url!.indexOf("/", preLen)
+              const userRoute = req.url?.substring(preLen, userIdIdx) || '';
+              console.log("user route:", userRoute)
+              proxyReqWs.setHeader('X-User-Route', userRoute);
+            });
+          }
+        },
         "/api/v1/": {
           target: "http://localhost:9001/",
-          ws: true,
+          ws: false,
           /** 替换掉代理路径  */
           rewrite: path => path.replace(/^\/api\/v1\//, ''),
           /** 打印代理目标路径  */
@@ -43,7 +65,14 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
             res.setHeader('x-req-proxyURL', proxyURL) 
           },
           /** 是否允许跨域 */
-          changeOrigin: true
+          changeOrigin: true,
+          // configure: (proxy, options) => {
+          //   proxy.on('proxyReq', (proxyReq, req, res) => {
+          //     // console.log("print proxyReq")
+          //     proxyReq.setHeader('X-User-Route', 'value');
+          //   });
+          // }
+          
         },
         
       },
@@ -58,39 +87,39 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       electron({
           entry: './electron/main.ts',
       }),
-      vitePrpxy({
-        "/api/v1/ws/": {
-          target: "ws://localhost:7891/",
-          ws: true,
-          /** 替换掉代理路径  */
-          rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\//, '/'),
-          /** 是否允许跨域 */
-          changeOrigin: true,
-          configure: (proxy, options) => {
-            // const server = http.createServer((req, res) => {
-            //   const { pathname, search } = new URL(req.url!, `http://${req.headers.host}`)
-            //   const proxyReq = createProxyMiddleware({
-            //     target: 'ws://localhost:7891/',
-            //     changeOrigin: true, 
-            //     pathRewrite: {'^\/api\/v1\/ws\/\d+\/': '/'},
-            //     onProxyReq: (proxyReq, req, res) => {
-            //       proxyReq.setHeader('', )
-            //     }
-            //   })(req, res);
-            // })
+      // proxy({
+      //   "/api/v1/ws/": {
+      //     target: "ws://localhost:7891/",
+      //     ws: true,
+      //     /** 替换掉代理路径  */
+      //     rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\//, '/'),
+      //     /** 是否允许跨域 */
+      //     changeOrigin: true,
+      //     configure: (proxy, options) => {
+      //       // const server = http.createServer((req, res) => {
+      //       //   const { pathname, search } = new URL(req.url!, `http://${req.headers.host}`)
+      //       //   const proxyReq = createProxyMiddleware({
+      //       //     target: 'ws://localhost:7891/',
+      //       //     changeOrigin: true, 
+      //       //     pathRewrite: {'^\/api\/v1\/ws\/\d+\/': '/'},
+      //       //     onProxyReq: (proxyReq, req, res) => {
+      //       //       proxyReq.setHeader('', )
+      //       //     }
+      //       //   })(req, res);
+      //       // })
 
-            proxy.on('proxyReq', (proxyReq, req, res) => {
-              // 从ws 请求url上截取用户id 
-              console.log("ws proxy path : ", proxyReq.path)
-              // const idx = proxyReq.path.indexOf('/api/v1/ws/');
-              // const findIdx =  req.url!.indexOf("/", idx + '/api/v1/ws/'.length)
-              // const userId = req.url!.substring('/api/v1/ws/'.length - 1, findIdx)
-              proxyReq.setHeader('http_user_instance', "userId")
-            })
-          } 
+      //       proxy.on('proxyReq', (proxyReq, req, res, options) => {
+      //         // 从ws 请求url上截取用户id 
+      //         console.log("ws proxy path : ", proxyReq.path)
+      //         // const idx = proxyReq.path.indexOf('/api/v1/ws/');
+      //         // const findIdx =  req.url!.indexOf("/", idx + '/api/v1/ws/'.length)
+      //         // const userId = req.url!.substring('/api/v1/ws/'.length - 1, findIdx)
+      //         proxyReq.setHeader('http_user_instance', "userId")
+      //       })
+      //     } 
           
-        },
-      })
+      //   },
+      // })
     ],
   }
 }
