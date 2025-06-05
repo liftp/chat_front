@@ -81,7 +81,7 @@ import SERVICE_IDENTIFIES from '@/constants/identifiers';
 import { showControl } from '@/util/menu_control/menu';
 
 import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
-import { etAddFriendship } from '@/constants/emitter_type';
+import { chatPanelScrollToBottom, etAddFriendship } from '@/constants/emitter_type';
 import { FriendQuery, FriendRelationship } from '@/api/types/friend_list';
 import { friendList } from '@/api/friend_list';
 import { ElNotification } from 'element-plus';
@@ -241,6 +241,7 @@ const choiceFriendChat = (friendId: number, chatType: number) => {
 		
 		chatHook.setChatType(chatType)
 		chatHook.choiceUserChat(friendId)
+		emitter.emit(chatPanelScrollToBottom)
 	}
 
 }

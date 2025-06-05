@@ -20,7 +20,7 @@
                 <el-main>
                     <div id="chatBox" ref="msg_arr" class="chat-msg-box" @scroll="scroll_msg_box">
                         <template v-if="delayShow">
-                            <el-scrollbar height="100%">
+                            <el-scrollbar ref="scrollbarRef" height="100%">
                                 <div  v-for="(line, index) in chatRecords"  :key="index" style="margin-top: 10px;">
                                     <template v-if="line.sendUserId !== currentUserId">
                                         <template v-if="friend.type === 2">
@@ -72,9 +72,10 @@ import { ChatRecord, ChatRecordSearch, FriendList, GroupMember } from '@/db/mode
 import {formatDate} from '@/script/DateUtil'
 import { findAllGroupMemberById, findGroupMemberById } from '@/api/group'
 import { GroupMemberVO } from '@/api/types/group'
-import { ElNotification } from 'element-plus'
+import { ElNotification, ScrollbarInstance } from 'element-plus'
 import { HashMap } from '@/util/common/HashMap'
 import { sendMsgToServer } from '@/api/msg'
+import { chatPanelScrollToBottom } from '@/constants/emitter_type'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
@@ -86,6 +87,8 @@ const groupMembers = ref<GroupMemberVO[]>()
 const groupMembersLocal = ref<HashMap<number, GroupMember>>()
 const delayShow = ref(false)
 
+const scrollbarRef = ref<ScrollbarInstance>()
+
 
 const host = window.location.host;
 const size = 20
@@ -94,6 +97,14 @@ let startDateTime = -1
 watchEffect(() => {
     upglide()
 })
+
+const scrollToBottom = () => {
+    const wrap = scrollbarRef.value?.wrapRef
+    if (wrap) {
+        wrap.scrollTop = wrap.scrollHeight;
+        console.log("scroll to bottom")
+    }
+}
 
 const props = withDefaults(defineProps<{friend?: FriendList}>(), {
     friend: () => {
@@ -171,11 +182,15 @@ const cleanMsgEventType = 'cleanMsg'
 onMounted(() => {
     emitter.on(addMsgEventType, (val) => {
         chatRecords.value.push(val as ChatRecord)
+        setTimeout(scrollToBottom, 500);
     })
     emitter.on(cleanMsgEventType, () => {
         console.log("clean ....")
         chatRecords.value = []
         startDateTime = -1
+    })
+    emitter.on(chatPanelScrollToBottom, () => {
+        setTimeout(scrollToBottom, 500)
     })
 })
 
@@ -207,6 +222,7 @@ function sendMsg() {
             chatRecords.value.push(record)
             // clear msg window
             inputText.value = ""
+            setTimeout(scrollToBottom, 500);
         })
     // emitter.emit("sendWsMsg", {...record, msgType: 2, groupId: chatType == 2 ? receiveUserId : -1, chatType})
 }
