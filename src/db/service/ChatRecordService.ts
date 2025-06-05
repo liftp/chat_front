@@ -1,4 +1,3 @@
-import { reject } from 'lodash-es'
 import {ChatRecord} from '../model/models'
 import {db} from '../NeDB'
 // interface ChatRecordService {

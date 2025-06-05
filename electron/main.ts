@@ -29,11 +29,15 @@ function createWindow () {
     // show: false,
     backgroundColor:'#00000000',//设置背景色为透明色
     // resizable:false,//关闭可调节窗口大小
+    // windows,及linux title栏配置
+    titleBarOverlay: false,
+    // mac title栏使用
+    // titleBarStyle : false,
     
     webPreferences: {
       // 书写渲染进程中的配置
       nodeIntegration: true, //开启true这一步很重要,目的是为了vue文件中可以引入node和electron相关的API
-      // contextIsolation: true, // 可以使用require方法
+      contextIsolation: true, // 可以使用require方法
       preload: path.join(__dirnameNew, '../src/preload/index.mjs'),
       sandbox: false
     //   enableRemoteModule: true, // 可以使用remote方法
@@ -44,7 +48,7 @@ function createWindow () {
 mainWindow.loadURL(`http://localhost:${process.env.PORT}`)//根据vue url更改
 
   // 打开开发工具
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 // 这段程序将会在 Electron 结束初始化

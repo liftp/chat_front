@@ -2,12 +2,8 @@ import vue from '@vitejs/plugin-vue'
 import { resolve } from "path"
 import electron from 'vite-plugin-electron'
 import { type ConfigEnv, type UserConfigExport, loadEnv } from "vite"
-// import http from 'http'
-// import { createProxyMiddleware } from 'http-proxy-middleware'
-// import { httpProxy } from 'http-proxy-middleware';
-// import { proxy } from 'vite-plugin-proxy';
+import { ClientRequest, IncomingMessage } from 'http'
 
-// https://vitejs.dev/config/
 export default ({ mode }: ConfigEnv): UserConfigExport => {
   const viteEnv = loadEnv(mode, process.cwd())
   const { VITE_PUBLIC_PATH } = viteEnv
@@ -33,20 +29,17 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       /** 接口代理 */
       proxy: {
         "/api/v1/ws/": {
-          target: "ws://localhost:8001/",
+          target: "ws://localhost/", // nginx的代理路径
           ws: true,
           /** 替换掉代理路径  */
-          // rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\/, '/'),
+          // rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\//, '/'),
           /** 是否允许跨域 */
           changeOrigin: true,
-          // headers: {
-          //   'X-User-route': `${}`
-          // },
           configure: (proxy, options) => {
+
             // ws 使用 proxyReqWs 事件
             proxy.on('proxyReqWs', (proxyReqWs, req, res) => {
-              console.log("replace before", req.url!)
-              const preLen = "/api/v2/ws/".length
+              const preLen = "/api/v1/ws/".length
               const userIdIdx = req.url!.indexOf("/", preLen)
               const userRoute = req.url?.substring(preLen, userIdIdx) || '';
               console.log("user route:", userRoute)
