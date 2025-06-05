@@ -75,7 +75,7 @@ import { GroupMemberVO } from '@/api/types/group'
 import { ElNotification, ScrollbarInstance } from 'element-plus'
 import { HashMap } from '@/util/common/HashMap'
 import { sendMsgToServer } from '@/api/msg'
-import { chatPanelScrollToBottom } from '@/constants/emitter_type'
+import { chatPanelScrollToBottom, etGroupInfoUpdate } from '@/constants/emitter_type'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
@@ -191,6 +191,9 @@ onMounted(() => {
     })
     emitter.on(chatPanelScrollToBottom, () => {
         setTimeout(scrollToBottom, 500)
+    })    
+    emitter.on(etGroupInfoUpdate, (val) => {
+        groupMemebersToUpdate(val as number, currentUserId)
     })
 })
 
@@ -198,6 +201,8 @@ onMounted(() => {
 onUnmounted(() => {
     emitter.off(addMsgEventType)
     emitter.off(cleanMsgEventType)
+    emitter.off(chatPanelScrollToBottom)
+    emitter.off(etGroupInfoUpdate)
 })
 
 function sendMsg() {
@@ -258,6 +263,7 @@ const groupMemberInfoPull = (groupId: number) => {
                             groupMembersLocal.value = localMap
 						})
 				} else {
+                    console.log("未超过拉取时间")
                     const localMap = new HashMap<number, GroupMember>();
                     members.forEach(m => {
                         localMap.set(m.memberId, m)
@@ -268,6 +274,33 @@ const groupMemberInfoPull = (groupId: number) => {
 			}
 		)
 	
+}
+
+// 群成员更新了，需要重新保存下数据，因为每次拉取有一小时的时间限制
+const groupMemebersToUpdate = (groupId: number, thisUser: number) => {
+    findAllGroupMemberById(groupId)
+        .then(memNew => {
+            console.log("更新群信息")
+            // 删掉旧的
+            window.electronApi.delMembersByGroupId(groupId, thisUser)
+            const currTime = new Date().getTime()
+            const memLocal: GroupMember[] = [];
+            memNew.data.forEach(mem => {
+                const ele = {...mem, lastPullTime: currTime, selfId: thisUser} as GroupMember
+                memLocal.push(ele)
+            })
+            // 添加新的
+            window.electronApi.saveGroupMembersLocal(memLocal)
+            // 如果是当前会话，更新成员缓存
+            // 刷新聊天记录
+            if (groupId === useCurrentChatHook().chatUserId && useCurrentChatHook().chatType === 2) {
+                const localMap = new HashMap<number, GroupMember>();
+                memLocal.forEach(m => {
+                    localMap.set(m.memberId, m)
+                })
+                groupMembersLocal.value = localMap
+            }
+        })
 }
 
 </script>

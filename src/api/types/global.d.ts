@@ -9,6 +9,7 @@ export interface ElectronApi {
     applyRecordFind: (self: number) => Promise<ApplyFriend[]>;
     applyRecordAdd: (data: ApplyFriend) => Promise<void>;
     applyRecordUpdate: (data: ApplyFriend) => Promise<void>;
+    friendshipAdd: (data: FriendRelationship) => Promise<void>;
     findGroupMembers: (groupId: number, selfId: number) => Promise<GroupMember[]>;
     saveGroupMembersLocal: (members: GroupMember[]) => Promise<void>;
     delMembersByGroupId: (groupId: number, selfId: number) => Promise<void>;
