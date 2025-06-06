@@ -2,12 +2,17 @@ import axios, {type AxiosInstance, type AxiosRequestConfig} from "axios"
 import { useUserStoreHook } from "@/store/modules/user"
 import { ElMessage } from "element-plus"
 import { get, merge } from "lodash-es"
-import { getToken } from "./cache/cookies"
+import { getToken, setToken } from "./cache/cookies"
+
+import { useRouter } from 'vue-router';
+import { config } from "process"
+
 
 
 function logout() {
     // store logout
-    location.reload()
+    const router = useRouter()
+    router.push({name: "login"})
 }
 
 function createService() {
@@ -38,7 +43,9 @@ function createService() {
             }
         },
         error => {
-            const status = get(error, 'response.status')
+            // const status = get(error, 'response.status')
+            // const data = get(error, 'response.data')
+            const { config, data, status } = error;
             switch (status) {
                 case 400:
                     error.message = "请求错误"
@@ -53,7 +60,16 @@ function createService() {
                     break;
                 case 507:
                     error.message = "token失效"
-                    logout()
+                    // 返回了新token,重新请求
+                    if (data && !config.retryCount) {
+                        config.retryCount = 1
+                        setToken(data as string)
+                        config.headers['token'] = data;
+                        service(config);
+                    } else {
+                        config.retryCount = 0;
+                        logout()
+                    }
                     break
                 case 508:
                     error.message = "用户名不存在"
