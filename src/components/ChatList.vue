@@ -44,7 +44,8 @@
 								<el-checkbox style="display: block; text-align: left; margin-left: 30px;" 
 									:label="friend.friendName" 
 									:value="friend.friendId"
-									:disabled="checkGroupIsContainsMember(friend.id)"
+									:disabled="checkGroupIsContainsMember(friend.friendId)"
+									:checked="checkGroupIsContainsMember(friend.friendId)"
 									/>
 							</template>
 						</el-checkbox-group>
@@ -134,6 +135,8 @@ onMounted(() => {
     })
 	emitter.on(etAddFriendship, (val) => {
 		friendsLocal.value.push(val as FriendList)
+		// 更新好友列表，用于群聊添加
+		remoteSearch({name:'', searchType:1})
     })
 	// 拉取单聊的所有未读消息,应该同步于消息展示之前(加载好友列表之前即可)
 	selectNotReadMsg()
@@ -220,7 +223,7 @@ const addGroupClick = (groupId: number) => {
 }
 
 const checkGroupIsContainsMember = (memberId: number) => {
-	return !(groupMembers.value.filter(e => e.groupId == memberId).length == 0)
+	return !(groupMembers.value.filter(e => e.memberId == memberId).length == 0)
 }
 
 onUnmounted(() => {

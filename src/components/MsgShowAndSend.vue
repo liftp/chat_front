@@ -170,8 +170,8 @@ function upglide() {
 }
 
 function scroll_msg_box() {
-    let scrollTop = document.getElementById("chatBox")?.scrollTop;
-    if (scrollTop == 0) {
+    let scrollTop = scrollbarRef.value?.wrapRef?.scrollTop;
+    if (scrollTop === 0) {
         // 加载数据
         upglide()
     }
