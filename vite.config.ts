@@ -29,7 +29,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       /** 接口代理 */
       proxy: {
         "/api/v1/ws/": {
-          target: "ws://localhost/", // nginx的代理路径
+          target: "ws://localhost:7891/", // nginx的代理路径
           ws: true,
           /** 替换掉代理路径  */
           // rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\//, '/'),

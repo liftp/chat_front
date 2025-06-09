@@ -1,29 +1,32 @@
-import axios, {type AxiosInstance, type AxiosRequestConfig} from "axios"
+import axios, {InternalAxiosRequestConfig, type AxiosInstance, type AxiosRequestConfig} from "axios"
 import { useUserStoreHook } from "@/store/modules/user"
 import { ElMessage } from "element-plus"
 import { get, merge } from "lodash-es"
 import { getToken, setToken } from "./cache/cookies"
 
-import { useRouter } from 'vue-router';
-import { config } from "process"
+import router from "@/router"
 
+
+interface CustomeAxiosConfig extends InternalAxiosRequestConfig {
+    retryCount?: number
+}
 
 
 function logout() {
-    // store logout
-    const router = useRouter()
+    // store logout、
     router.push({name: "login"})
 }
 
 function createService() {
     const service = axios.create()
     service.interceptors.request.use(
-        (config) => config,
+        (config: CustomeAxiosConfig) => config,
         error => Promise.reject(error)
     )
 
     service.interceptors.response.use(
         (response) => {
+            console.log("res", response)
             const apiData = response.data
             const responseType = response.request?.responseType
             if (responseType === 'blob' || responseType === 'arraybuffer') return apiData
@@ -33,19 +36,43 @@ function createService() {
                 return Promise.reject(new Error("非本系统接口"))
             }
 
-            switch (code) {
-                case 202:
-                    return apiData
-                default:
-                    ElMessage.error(apiData.remark || apiData)
-                    return Promise.reject(new Error("Error"))
+            // token 换新token，再次请求
+            if (code === 507) {
+                console.log("again request", response.config)
 
+                const config = response.config as CustomeAxiosConfig;
+                if (!config.retryCount || config.retryCount === 0) {
+                    config.retryCount = 1
+                    
+                    console.log("again token", apiData.data)
+                    useUserStoreHook().updateToken(apiData.data as string)
+                    config.headers['token'] = useUserStoreHook().token
+                    return service(config);
+                } else {
+                    config.retryCount = 0;
+                    logout()
+                }
+                return Promise.reject(new Error("token invalid"))
             }
+
+            return apiData;
+
+            // switch (code) {
+            //     case 202:
+            //         return apiData
+            //     default:
+            //         ElMessage.error(apiData.remark || apiData)
+            //         return Promise.reject(new Error("Error"))
+
+            // }
         },
         error => {
             // const status = get(error, 'response.status')
             // const data = get(error, 'response.data')
-            const { config, data, status } = error;
+            console.log("again request")
+            const status = error.response?.data?.code;
+            const data = error.response?.data?.data;
+            const config = error.config;
             switch (status) {
                 case 400:
                     error.message = "请求错误"
@@ -60,16 +87,7 @@ function createService() {
                     break;
                 case 507:
                     error.message = "token失效"
-                    // 返回了新token,重新请求
-                    if (data && !config.retryCount) {
-                        config.retryCount = 1
-                        setToken(data as string)
-                        config.headers['token'] = data;
-                        service(config);
-                    } else {
-                        config.retryCount = 0;
-                        logout()
-                    }
+
                     break
                 case 508:
                     error.message = "用户名不存在"

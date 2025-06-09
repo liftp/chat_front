@@ -51,8 +51,12 @@ const useUserStore = defineStore("user", () => {
         roles.value = []
     }
 
+    const updateToken = (tokenNew: string) => {
+        token.value = tokenNew
+    }
 
-    return {token, roles, loginName, userId, realname, login, logout, resetToken}
+
+    return {token, roles, loginName, userId, realname, login, logout, resetToken, updateToken}
 })
 
 export function useUserStoreHook() {
