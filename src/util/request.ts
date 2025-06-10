@@ -26,7 +26,6 @@ function createService() {
 
     service.interceptors.response.use(
         (response) => {
-            console.log("res", response)
             const apiData = response.data
             const responseType = response.request?.responseType
             if (responseType === 'blob' || responseType === 'arraybuffer') return apiData
@@ -38,13 +37,11 @@ function createService() {
 
             // token 换新token，再次请求
             if (code === 507) {
-                console.log("again request", response.config)
 
                 const config = response.config as CustomeAxiosConfig;
                 if (!config.retryCount || config.retryCount === 0) {
                     config.retryCount = 1
                     
-                    console.log("again token", apiData.data)
                     useUserStoreHook().updateToken(apiData.data as string)
                     config.headers['token'] = useUserStoreHook().token
                     return service(config);
@@ -67,12 +64,10 @@ function createService() {
             // }
         },
         error => {
+            // status 状态异常才会走这里
             // const status = get(error, 'response.status')
             // const data = get(error, 'response.data')
-            console.log("again request")
-            const status = error.response?.data?.code;
-            const data = error.response?.data?.data;
-            const config = error.config;
+            const status = error.response?.status;
             switch (status) {
                 case 400:
                     error.message = "请求错误"

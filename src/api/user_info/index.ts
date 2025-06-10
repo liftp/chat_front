@@ -15,3 +15,11 @@ export function searchUser(query: User.UserQuery) {
         data: query
     })
 }
+
+export function addUserApi(data: User.UserAdd) {
+    return request<User.UserAddResponse>({
+        url: "user/insertUser",
+        method: 'post',
+        data
+    })
+}
