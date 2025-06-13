@@ -78,13 +78,13 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       vue(),
       
       electron({
-          entry: './dist-electron/main.js',
-          vite: {
-            build: {
-              outDir: 'node_modules/.cache/vite-electron',
-              write: false
-            }
-          }
+          entry: './electron/main.ts'
+          // vite: {
+          //   build: {
+          //     outDir: 'node_modules/.cache/vite-electron',
+          //     write: false
+          //   }
+          // }
           
       }),
       // proxy({
