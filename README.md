@@ -132,9 +132,20 @@
 
    
 
+#### 4. 前端项目部署及打包
+
+1. ```shell
+   # 这里采用的依赖版本可以在package.json中对应
+   #开发环境安装及运行
+   npm install -i  # cnpm 可能会比较快一些
+   npm install -i --save-dev
+   npm run build # 先打包electron的入口文件dist-electron/main.js, 后续就可以直接启动了
+   npm run dev-i1 # 本地开发环境实例启动
+   ```
 
 
-#### 4. 该项目不完善的地方
+
+#### 5. 该项目不完善的地方
 
 1. 只是作为一个demo使用，没有完善表单验证，样式及交互问题， 功能上还缺少群聊添加成员后的消息通知处理
 
