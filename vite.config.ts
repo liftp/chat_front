@@ -1,5 +1,5 @@
 import vue from '@vitejs/plugin-vue'
-import { resolve } from "path"
+import path, { resolve } from "path"
 import electron from 'vite-plugin-electron'
 import { type ConfigEnv, type UserConfigExport, loadEnv } from "vite"
 import { ClientRequest, IncomingMessage } from 'http'
@@ -78,7 +78,14 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       vue(),
       
       electron({
-          entry: './electron/main.ts',
+          entry: './dist-electron/main.js',
+          vite: {
+            build: {
+              outDir: 'node_modules/.cache/vite-electron',
+              write: false
+            }
+          }
+          
       }),
       // proxy({
       //   "/api/v1/ws/": {
