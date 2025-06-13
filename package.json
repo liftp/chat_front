@@ -9,7 +9,7 @@
     "dev": "vite --mode development",
     "build": "vue-tsc -b && vite build --mode prod",
     "preview": "vite preview",
-    "electron:build": "npm run build && electron-builder",
+    "electron:build": "npm run build && electron-builder --win",
     "electron:server": "vite"
   },
   "build": {
