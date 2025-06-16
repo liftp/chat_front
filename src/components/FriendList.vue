@@ -111,7 +111,7 @@
                                     发送
                                 </el-button>
                                 
-                                <template #reference>
+                                <template v-if="useUserStoreHook().userId != scope.row.id" #reference>
                                     <el-button type="primary"
                                         size="small"
                                         @click="applyWindowShow = true"
