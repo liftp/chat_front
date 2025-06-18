@@ -52,8 +52,11 @@ const submitForm = (formEl: FormInstance | undefined) => {
         if (valid) {
             useUserStoreHook()
                 .login(loginForm)
-                .then(() => {
-                    router.push({name: "home"})
+                .then((res) => {
+                    if (res) {
+                        router.push({name: "home"})
+                    }
+                    // 其他错误情况不能登录
                 })
         } 
     })
