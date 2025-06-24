@@ -1,7 +1,8 @@
 export interface UserInfo {
     username: string,
     name: string,
-    id: number
+    id: number,
+    friendRelation: boolean, // true: 与查询人是好友关系，false，非好友关系
 }
 
 export interface UserAdd {
