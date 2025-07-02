@@ -40,7 +40,9 @@ const findGroupMembers = async (groupId, selfId) => {
 const selectGroupWithMaxMsgId = async (selfId) => {
 	return await ipcRenderer.invoke('select-group-with-max-msg-id', selfId)
 }
-
+const localFileSave = async (path, blob) => {
+	return await ipcRenderer.invoke('local-file-save', path, blob)
+}
 
 
 contextBridge.exposeInMainWorld('electronApi', {
@@ -55,4 +57,6 @@ contextBridge.exposeInMainWorld('electronApi', {
 	findGroupMembers,
 	saveGroupMembersLocal,
 	delMembersByGroupId,
+	selectGroupWithMaxMsgId,
+	localFileSave,
 })

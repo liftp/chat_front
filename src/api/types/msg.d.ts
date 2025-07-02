@@ -10,6 +10,7 @@ export interface ChatServerMsgRecord {
     chatType: number,
     selfId?: number, // 消息所属
     dateTime?: number, // 时间戳用于排序
+    contentType: number, // 1: 文本 2：语音
 }
 
 export type ChatServerMsgResponse = ApiResponseData<ChatServerMsgRecord[]>

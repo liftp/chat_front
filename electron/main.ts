@@ -1,5 +1,5 @@
 // 控制应用生命周期和创建原生浏览器窗口的模组
-import { app, BrowserWindow, ipcMain }  from 'electron'
+import { app, BrowserWindow, ipcMain, session, systemPreferences }  from 'electron'
 import path from 'path'
 import process from 'process'
 import { fileURLToPath } from 'url'
@@ -11,15 +11,33 @@ import { findFriend, saveRecord as saveFriendship } from '../src/db/service/Frie
 import { recordList, updateRecord } from '../src/db/service/ApplyFriendService'
 import {saveRecord as saveApplyFriend} from "../src/db/service/ApplyFriendService"
 import { ApplyFriend, ChatRecord, FriendRelationship, GroupMember } from '../src/db/model/models'
+import { localFileSave } from '../src/service/file/FileSaveService'
 // import('./preload/preload.mjs')
 const __filenameNew = fileURLToPath(import.meta.url)
 
 const __dirnameNew = path.dirname(__filenameNew)
 console.log(__dirnameNew)
 
+async function checkMediaAccess(mediaType: 'microphone' | 'camera'  ) {
+  const result = systemPreferences.getMediaAccessStatus(mediaType)
+  // console.log("permission: ", result)
+  // if (result !== 'granted') {
+  //   await systemPreferences.askForMediaAccess(mediaType)
+  //     .then(val => {
+  //       if (val) {
+  //         console.log(mediaType, "权限已获取")
+  //       }
+  //     })
+  //     .catch(err => {
+  //       if (!err) {
+  //         console.log(mediaType, "权限获取异常", err)
+  //       }
+  //     })
+  // }
+}
 
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'; // 关闭控制台的警告
-function createWindow () {
+// process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'; // 关闭控制台的警告
+async function createWindow() {
   // 创建浏览器窗口
   const mainWindow = new BrowserWindow({
     width: 1000,
@@ -43,18 +61,54 @@ function createWindow () {
     //   enableRemoteModule: true, // 可以使用remote方法
     }
   })
+
+  await checkMediaAccess('microphone')
+  // mainWindow.webContents.session.on("")
+  // mainWindow.webContents.session.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+  //   // console.log("detail", details, permission)
+  //   if (permission === 'media') {
+  //     console.log("media")
+  //     return false
+  //   }
+  //   if (permission === 'notifications') {
+  //     console.log("notification")
+  //     return false;
+  //   }
+  //   return true;
+  // })
+
+  // mainWindow.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+  //   // if ((webContents.getURL() === 'some-host') && permission === 'media') {
+  //   //   return callback(false)
+  //   // }
+  //   if (permission === 'media') {
+  //     // console.log(permission)
+  //     return callback(false)
+  //   }
+  //   if (permission === 'notifications') {
+  //     return callback(false);
+  //   }
+  //   return callback(true)
+  // })
+
+
   // 加载 index.html
-//   mainWindow.loadFile('./index.html') // 新增
-mainWindow.loadURL(`http://localhost:${process.env.PORT}`)//根据vue url更改
+  //   mainWindow.loadFile('./index.html') // 新增
+  mainWindow.loadURL(`http://localhost:${process.env.PORT}`)//根据vue url更改
+
 
   // 打开开发工具
   // mainWindow.webContents.openDevTools()
+
 }
 
 // 这段程序将会在 Electron 结束初始化
 // 和创建浏览器窗口的时候调用
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(() => {
+
+  // 语音录制权限
+
   ipcMain.handle('read-record', async (event, start, end, search) => {
     return await readRecord(start, end, search);
   })
@@ -91,7 +145,9 @@ app.whenReady().then(() => {
   ipcMain.handle('select-group-with-max-msg-id', async (event, selfId: number) => {
     return await selectGroupWithMaxMsgId(selfId);
   })
-  
+  ipcMain.handle('local-file-save', async (event, path: string, buffer: Buffer) => {
+    return await localFileSave(path, buffer);
+  })
 
   createWindow()
   app.on('activate', function () {

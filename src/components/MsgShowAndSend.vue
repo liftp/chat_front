@@ -214,7 +214,7 @@ function sendMsg() {
     const record: ChatRecord = { chatType: chatType, saveType: "1", 
         sendUserId: currentUserId, receiveUserId: receiveUserId, 
         friendId: receiveUserId, content: inputText.value, 
-        dateTime: dateTime.getTime(), createdAt};
+        dateTime: dateTime.getTime(), createdAt, contentType: 1 };
     console.log(record)
     // send msg to server 
     // 这里自己发送的消息，为了在响应的时候拿到该数据的id，所以使用http请求，从返回值拿发送人的那条数据信息
@@ -222,7 +222,7 @@ function sendMsg() {
         .then(msgResp => {
             const msgWrap = msgResp.data
             // save to local db
-            window.electronApi.writeMsg({...msgWrap, selfId: currentUserId, friendId: receiveUserId, chatType})
+            window.electronApi.writeMsg({...msgWrap, selfId: currentUserId, friendId: receiveUserId, chatType, contentType: 1})
             // record to add current chat window
             chatRecords.value.push(record)
             // clear msg window
