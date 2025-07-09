@@ -8,17 +8,29 @@ export const localFileSave = async (fileName: string, arrayBuffer: ArrayBuffer) 
         fs.mkdirSync(userPath, {recursive: true})
     }
     // todo 数据存储路径可配置
-    const filePath = path.join(userPath, crypto.randomUUID + fileName)
+    const filePath = path.join(userPath, crypto.randomUUID() + fileName)
     console.log("file path", filePath)
     return new Promise<string>((resolve, reject) => {
         fs.writeFile(filePath, buffer, (err) => {
             if (err) {
                reject(err)
             }
-            resolve(fileName)
+            resolve(filePath)
         })
     })
 
+}
+
+export const readLocalFileContent = async (fileName: string) => {
+    return new Promise<ArrayBuffer>((resolve, reject) => {
+        fs.readFile(fileName, (err, data) => {
+            if (err) {
+                reject(err)
+            }
+            const buf = data.buffer
+            resolve(buf.slice(data.byteOffset, data.byteOffset + buf.byteLength))
+        })
+    })
 }
 
 

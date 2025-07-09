@@ -9,9 +9,9 @@ import {findGroupMembersLocal, saveGroupMembersLocal, delMembersByGroupIdLocal} 
 import {readRecord, countRecord, saveRecord, selectGroupWithMaxMsgId} from '../src/db/service/ChatRecordService'
 import { findFriend, saveRecord as saveFriendship } from '../src/db/service/FriendListService'
 import { recordList, updateRecord } from '../src/db/service/ApplyFriendService'
-import {saveRecord as saveApplyFriend} from "../src/db/service/ApplyFriendService"
+import {saveRecord as saveApplyFriend, delRecordBySelf as deleteApplyFriend} from "../src/db/service/ApplyFriendService"
 import { ApplyFriend, ChatRecord, FriendRelationship, GroupMember } from '../src/db/model/models'
-import { localFileSave } from '../src/service/file/FileSaveService'
+import { localFileSave, readLocalFileContent } from '../src/service/file/FileSaveService'
 // import('./preload/preload.mjs')
 const __filenameNew = fileURLToPath(import.meta.url)
 
@@ -130,6 +130,9 @@ app.whenReady().then(() => {
   ipcMain.handle('apply-record-update', async (event, data: ApplyFriend) => {
     await updateRecord(data);
   })
+  ipcMain.handle('apply-record-delete', async (event, selfId: number) => {
+    await deleteApplyFriend(selfId);
+  })
   ipcMain.handle('friendship-add', async (event, data: FriendRelationship) => {
     await saveFriendship({...data});
   })
@@ -147,6 +150,9 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('local-file-save', async (event, path: string, buffer: Buffer) => {
     return await localFileSave(path, buffer);
+  })
+  ipcMain.handle('read-local-file-content', async (event, path: string) => {
+    return await readLocalFileContent(path);
   })
 
   createWindow()

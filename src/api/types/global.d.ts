@@ -9,12 +9,14 @@ export interface ElectronApi {
     applyRecordFind: (self: number) => Promise<ApplyFriend[]>;
     applyRecordAdd: (data: ApplyFriend) => Promise<void>;
     applyRecordUpdate: (data: ApplyFriend) => Promise<void>;
+    applyRecordDelete: (selfId: number) => Promise<void>;
     friendshipAdd: (data: FriendRelationship) => Promise<void>;
     findGroupMembers: (groupId: number, selfId: number) => Promise<GroupMember[]>;
     saveGroupMembersLocal: (members: GroupMember[]) => Promise<void>;
     delMembersByGroupId: (groupId: number, selfId: number) => Promise<void>;
     selectGroupWithMaxMsgId: (selfId: number) => Promise<ChatRecord[]>;
     localFileSave: (path: string, buffer: ArrayBuffer) => Promise<string>;
+    readLocalFileContent: (path: string) => Promise<ArrayBuffer>;
 }
 
 declare global {

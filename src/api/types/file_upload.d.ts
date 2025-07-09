@@ -8,5 +8,5 @@ export interface FileDownload {
     data: ArrayBuffer
 }
 
-export type FileInfoResp = ApiResponseData<FileInfo>
+export type FileInfoResp = ApiResponseData<string>
 export type FileDownloadResp = ArrayBuffer

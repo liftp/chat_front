@@ -1,6 +1,39 @@
 <template>
-    <el-button :disabled="voiceShow" v-on="{mousedown: voiceActionStart, mouseup: voiceActionEnd}">
-        长按录音
+    <el-tooltip
+        class="box-item"
+        effect="dark"
+        content="清空语音内容"
+        placement="top-start">
+
+        <el-button :disabled="!sendAudioShow"
+            type="danger"
+            style="margin-right: 5px"
+            @click="audioClear"
+            :icon="Delete"
+            circle
+            bg>
+            
+        </el-button>
+    </el-tooltip>
+    <el-button :disabled="voiceShow" 
+        v-on="{mousedown: voiceActionStart, mouseup: voiceActionEnd}"
+        v-show="!sendAudioShow"
+        key="success"
+        type="success"
+        style="margin-right: 5px"
+        text
+        bg>
+        长按语音
+    </el-button>
+    <el-button 
+        v-show="sendAudioShow"
+        key="success"
+        type="success"
+        style="margin-right: 5px"
+        @click="sendAudio"
+        text
+        bg>
+        发送语音
     </el-button>
 </template>
 
@@ -9,8 +42,15 @@ import { fileUpload } from "@/api/fileupload";
 import { ChatRecordDTO, sendMsgToServer } from "@/api/msg";
 import { useCurrentChatHook, useUserStoreHook } from "@/store/modules/user";
 import { onMounted, ref } from "vue";
+import { Delete } from "@element-plus/icons-vue";
+import emitter from "@/util/emitter";
+import { addMsgEventType, etAudioStatus } from "@/constants/emitter_type";
+import { ChatRecord } from "@/db/model/models";
 
+// v-on="{mousedown: voiceActionStart, mouseup: voiceActionEnd}"
 const voiceShow = ref<boolean>(false)
+const cancelShow = ref<boolean>(false)
+const sendAudioShow = ref<boolean>(false)
 
 // const wavesurfaceRef = ref();
 const mediaStream = ref<MediaStream>();
@@ -20,10 +60,10 @@ const audioTrack = ref<MediaStreamTrack>();
 const isRecording = ref<boolean>(false)
 
 
-
 const voiceActionStart = async () => {
 
     console.log("开始录制")
+    emitter.emit(etAudioStatus, true)
     navigator.mediaDevices
         .getUserMedia({audio: true})
         .then(stream => {
@@ -34,7 +74,9 @@ const voiceActionStart = async () => {
             mediaRecorder.value = new MediaRecorder(stream)
             mediaRecorder.value.start()
             isRecording.value = true
+            
             // voiceShow.value = true;
+            // 录制监听
             mediaRecorder.value.addEventListener("dataavailable", (e) => {
                 if (e.data.size > 0) {
                     console.log("recording...")
@@ -43,8 +85,16 @@ const voiceActionStart = async () => {
                     
                 }
             });
+            // 录制停止回调
             mediaRecorder.value.addEventListener("stop", () => {
-                saveAudio()
+                // sendAudio()
+                // 展示清空语音按钮
+                cancelShow.value = true
+                // 展示发送语音，屏蔽长按录制
+                sendAudioShow.value = true
+                
+                // 这里不能调用emitter，不生效具体原因待查找...
+                
             })
             // wavesurfaceRef.value.play()
         })
@@ -60,14 +110,20 @@ const voiceActionEnd = () => {
     if (isRecording) {
         mediaRecorder.value?.stop()
         mediaStream.value?.getTracks().forEach((track) => track.stop())
+
         isRecording.value = false
+        if (audioTrack.value) {
+            audioTrack.value.enabled = false
+        }
         
         voiceShow.value = false;
+        // 父组件的语音状态控制
+        emitter.emit(etAudioStatus, false)
     }
     
 }
 
-const saveAudio = async () => {
+const sendAudio = async () => {
     if (recordedChunks.value.length > 0) {
         const chatType = useCurrentChatHook().chatType;
         const chatUserId = useCurrentChatHook().chatUserId;
@@ -82,14 +138,14 @@ const saveAudio = async () => {
         const fileName = await window.electronApi.localFileSave(fileNameExt, arrayBuffer)
         // 远程上传
         const formData = new FormData()
-        formData.append("file", blob)
+        formData.append("file", blob, fileName.substring(fileName.lastIndexOf("\\") + 1))
         
         fileUpload(formData)
             .then(fileInfo => {
                 // 合成消息信息，提交服务端
-                const msg: ChatRecordDTO = {contentType: 2, chatType: chatType, content: fileInfo.data.url, 
+                const msg: ChatRecordDTO = {contentType: 2, chatType: chatType, content: fileInfo.data, 
                     saveType: '1', sendUserId: currentUserId, receiveUserId: chatUserId, 
-                    friendId: useCurrentChatHook().chatUserId, groupId: chatType == 1 ? -1 : chatUserId,
+                    friendId: chatUserId, groupId: chatType == 1 ? -1 : chatUserId,
                     msgType: 2
                 }
                 
@@ -100,20 +156,30 @@ const saveAudio = async () => {
                         const msgWrap = msgResp.data
                         // save to local db
                         // 本地存储
-                        window.electronApi.writeMsg({...msgWrap, selfId: useCurrentChatHook().chatUserId, friendId: msg.friendId, chatType, contentType: 2})
+                        const chatMsg: ChatRecord = {...msgWrap, dateTime: Number(msgWrap.dateTime),
+                            localStore: fileName, selfId: currentUserId, 
+                            friendId: msg.friendId, chatType, contentType: 2}
+                        window.electronApi.writeMsg(chatMsg)
+
                         // record to add current chat window
-                        // chatRecords.value.push(record)
-                        // clear msg window
-                        // inputText.value = ""
-                        // setTimeout(scrollToBottom, 500);
+                        emitter.emit(addMsgEventType, chatMsg)
+                        sendAudioShow.value = true
                     })
+                sendAudioShow.value = true
             })
             .catch(err => {
                 console.log("语音消息发送失败", err)
+                sendAudioShow.value = true
             })
         
         
     }
     recordedChunks.value = []
+}
+
+const audioClear = () => {
+    recordedChunks.value = []
+    sendAudioShow.value = false
+    isRecording.value = false
 }
 </script>

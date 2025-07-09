@@ -2,10 +2,11 @@
 import {reactive, ref} from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { type LoginRequestData } from '@/api/types/login';
-import { useUserStoreHook } from '@/store/modules/user';
+import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user';
 import { useRouter } from 'vue-router';
 import { UserAdd } from '@/api/types/user_info';
 import { addUserApi } from '@/api/user_info';
+
 const router = useRouter()
 const ruleFormRef = ref<FormInstance>()
 const addUserFormRef = ref<FormInstance>()

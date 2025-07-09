@@ -5,6 +5,9 @@ export function fileUpload(data: FormData) {
     return request<FileInfoResp>({
         url: 'file/upload',
         method: 'post',
+        headers: {
+            'Content-Type': "multipart/form-data",
+        },
         data,
     })
 }
