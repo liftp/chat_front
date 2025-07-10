@@ -9,4 +9,4 @@ export interface FileDownload {
 }
 
 export type FileInfoResp = ApiResponseData<string>
-export type FileDownloadResp = ArrayBuffer
+export type FileDownloadResp = Blob

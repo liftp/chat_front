@@ -28,21 +28,16 @@
                                                 <span style="font-size: 12px;">{{ groupMembersLocal?.get(line.sendUserId)?.memberRemark }}</span>
                                             </div>
                                         </template>
-                                        <div :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'">
+                                        <div class="item-left">
                                             <template v-if="line.contentType === 1">
                                                 <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
                                             </template>
                                             <template v-if="line.contentType === 2">
                                                 <div class="bubble-triangle bubble-triangle-right"></div>
-                                                <!-- <div class="item item-left-child">{{line.content}}</div> -->
-                                                <div class="item item-left-child">
-                                                    <div class="loader-inner ball-scale-multiple">
-                                                        <div></div>
-                                                        <div></div>
-                                                        <div></div>
-                                                    </div>
-                                                </div>
-                                                <!-- <AudioListener /> -->
+                                                <AudioListener :audioPath="line.localStore" direct="left" 
+                                                    :contentLen="line.contentLen"
+                                                    class="item item-left-child" :style="calcMsgAudioLen(line.contentLen)" />
+
                                             </template>
                                         </div>
                                     </template>
@@ -55,8 +50,10 @@
                                         <template v-if="line.contentType === 2">
                                             <div class="item-right">
                                                 <!-- <div class="item item-left-child">{{line.content}}</div> -->
-
-                                                <AudioListener :audioPath="line.localStore"  class="item item-right-child"/>
+                                                
+                                                <AudioListener :audioPath="line.localStore" direct="right" 
+                                                    :contentLen="line.contentLen"
+                                                    class="item item-right-child" :style="calcMsgAudioLen(line.contentLen)" />
                                                 <div class="bubble-triangle bubble-triangle-left"></div>
                                             </div>
                                             <!-- <AudioListener /> -->
@@ -342,6 +339,15 @@ const groupMemebersToUpdate = (groupId: number, thisUser: number) => {
                 groupMembersLocal.value = localMap
             }
         })
+}
+
+const calcMsgAudioLen = (contentLen: number | undefined) => {
+    const baseLen = 60;
+    if (!contentLen) {
+        return 'width:' + baseLen + 'px'
+    }
+    const len = Math.min(100, contentLen)
+    return 'width:' + (baseLen + len) + 'px';
 }
 
 </script>

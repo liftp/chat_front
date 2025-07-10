@@ -1,10 +1,22 @@
 <template>
     <div @click="playAudio">
-        <div style="display: flex; ">
-            <div class="circle_half_2 shape_animation_3"></div>
-            <div class="cricle_half_1 shape_animation_2"></div>
-            <div class="triangle_audio"></div>
-        </div>
+        <template v-if="direct === 'left'">
+            <div style="display: flex;justify-content: start;">
+                <div class="triangle_audio_left"></div>
+                <div class="cricle_half_1_left shape_animation_2"></div>
+                <div class="circle_half_2_left shape_animation_3"></div>
+                <div style="margin-left: 10px;">{{ contentLen }}''</div>
+            </div>
+        </template>
+        <template v-if="direct === 'right'">
+            <div style="display: flex;justify-content: end;">
+                <div style="margin-right: 10px;">{{ contentLen }}''</div>
+                <div class="circle_half_2 shape_animation_3"></div>
+                <div class="cricle_half_1 shape_animation_2"></div>
+                <div class="triangle_audio"></div>
+            </div>
+        </template>
+
         <audio ref="audioRef" :src="srcUrl" style="display: none;"></audio>
     </div>
 </template>
@@ -12,7 +24,7 @@
 import { onUnmounted, ref } from 'vue';
 
 
-const props = withDefaults(defineProps<{audioPath?: string}>(), {
+const props = withDefaults(defineProps<{audioPath?: string, direct: 'left' | 'right', contentLen: number | undefined}>(), {
 })
 const srcUrl = ref<string>('')
 const audioRef = ref<HTMLAudioElement>()
@@ -43,18 +55,6 @@ onUnmounted(() => {
 </script>
 <style lang="css">
 
-    .audio_dynamic_effect {
-        display: block;
-        z-index: 100; 
-        position: absolute; 
-        left: 50%; 
-        top:50%;
-    }
-
-    .audio_dynamic_effect_div {
-        width: 25px;
-        height: 25px;
-    }
 
     .triangle_audio {
         border: 3px solid transparent;
@@ -80,6 +80,36 @@ onUnmounted(() => {
     .circle_half_2 {
         border: 2px solid transparent;
         border-left-color: black;
+        border-radius: 14px;
+        width: 14px;
+        height: 14px;
+    }
+
+    .triangle_audio_left {
+        border: 3px solid transparent;
+        width: 0px;
+        height: 0px;
+        content: '';
+        /* background-color: black; */
+        border-right-color: black;
+        /* border-right-color: white; */
+        margin-left: -7px;
+        margin-top: 6px;
+    }
+    .cricle_half_1_left {
+        
+        border: 2px solid transparent;
+        border-right-color: black;
+        border-radius: 8px;
+        width: 8px;
+        height: 8px;
+        margin-right: -13px;
+        margin-left: -7px;
+        margin-top: 3px;
+    }
+    .circle_half_2_left {
+        border: 2px solid transparent;
+        border-right-color: black;
         border-radius: 14px;
         width: 14px;
         height: 14px;

@@ -15,8 +15,8 @@ export function fileUpload(data: FormData) {
 export function fileDownload(fileUrl: string) {
     return request<FileDownloadResp>({
         url: 'file/download',
-        method: 'post',
-        data: fileUrl,
-        responseType: 'arraybuffer'
+        method: 'get',
+        params: {fileName: fileUrl},
+        responseType: 'blob'
     })
 }

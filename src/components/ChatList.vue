@@ -88,6 +88,7 @@ import { friendList } from '@/api/friend_list';
 import { ElNotification } from 'element-plus';
 import {  findGroupMemberById, groupMemebersAddApi } from '@/api/group';
 import { GroupMemberVO } from '@/api/types/group';
+import { fileDownload } from '@/api/fileupload';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const groupOperation = ref<string>();
@@ -142,10 +143,21 @@ onMounted(() => {
 	selectNotReadMsg()
 		.then((docs) => {
 			if (docs != null && docs.data != null) {
-				docs.data.forEach(element => {
+				docs.data.forEach(async element => {
 					element.selfId = element.receiveUserId
 					element.friendId = element.sendUserId
 					element.dateTime = Number(element.dateTime)
+					// 语音消息，需要先下载内容，再保存消息
+					if (element.contentType == 2) {
+						const fileKey = element.content.substring(element.content.indexOf("/chat") + "/chat".length)
+						const blobData = await fileDownload(fileKey)
+						console.log("download buf", blobData)
+						const blob = new Blob([blobData], {type: 'audio/webm'})
+						
+						const fileNameExt = useUserStoreHook().userId + "_audio" + ".WebM";
+						const filepath = await window.electronApi.localFileSave(fileNameExt, await blob.arrayBuffer())
+						element.localStore = filepath
+					}
 					window.electronApi.writeMsg(element)
 				});
 			}

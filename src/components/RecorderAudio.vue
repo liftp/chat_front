@@ -58,6 +58,7 @@ const mediaRecorder = ref<MediaRecorder>();
 const recordedChunks = ref<Blob[]>([]);
 const audioTrack = ref<MediaStreamTrack>();
 const isRecording = ref<boolean>(false)
+const bitsPerSeconds = ref<number>(-1);
 
 
 const voiceActionStart = async () => {
@@ -74,6 +75,8 @@ const voiceActionStart = async () => {
             mediaRecorder.value = new MediaRecorder(stream)
             mediaRecorder.value.start()
             isRecording.value = true
+            bitsPerSeconds.value = mediaRecorder.value?.audioBitsPerSecond
+            console.log("bitsPerSeconds", bitsPerSeconds.value)
             
             // voiceShow.value = true;
             // 录制监听
@@ -93,6 +96,7 @@ const voiceActionStart = async () => {
                 // 展示发送语音，屏蔽长按录制
                 sendAudioShow.value = true
                 
+                console.log("chunks len ", recordedChunks.value.map(e => e.size).reduce((pre, cur) => pre + cur))
                 // 这里不能调用emitter，不生效具体原因待查找...
                 
             })
@@ -128,6 +132,8 @@ const sendAudio = async () => {
         const chatType = useCurrentChatHook().chatType;
         const chatUserId = useCurrentChatHook().chatUserId;
         const currentUserId = useUserStoreHook().userId;
+        // 记录时长
+        const recordTime = Math.ceil(recordedChunks.value.map(e => e.size).reduce((pre, cur) => pre + cur) * 8 / bitsPerSeconds.value);
         const blob = new Blob(recordedChunks.value, { type: "audio/webm"});
         console.log("save local...")
         const arrayBuffer = await blob.arrayBuffer();
@@ -146,7 +152,7 @@ const sendAudio = async () => {
                 const msg: ChatRecordDTO = {contentType: 2, chatType: chatType, content: fileInfo.data, 
                     saveType: '1', sendUserId: currentUserId, receiveUserId: chatUserId, 
                     friendId: chatUserId, groupId: chatType == 1 ? -1 : chatUserId,
-                    msgType: 2
+                    msgType: 2, contentLen: recordTime
                 }
                 
 
@@ -158,18 +164,18 @@ const sendAudio = async () => {
                         // 本地存储
                         const chatMsg: ChatRecord = {...msgWrap, dateTime: Number(msgWrap.dateTime),
                             localStore: fileName, selfId: currentUserId, 
-                            friendId: msg.friendId, chatType, contentType: 2}
+                            friendId: msg.friendId, chatType, contentType: 2, contentLen: recordTime}
                         window.electronApi.writeMsg(chatMsg)
 
                         // record to add current chat window
                         emitter.emit(addMsgEventType, chatMsg)
-                        sendAudioShow.value = true
+                        sendAudioShow.value = false
                     })
-                sendAudioShow.value = true
+                sendAudioShow.value = false
             })
             .catch(err => {
                 console.log("语音消息发送失败", err)
-                sendAudioShow.value = true
+                sendAudioShow.value = false
             })
         
         
