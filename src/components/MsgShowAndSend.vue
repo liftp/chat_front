@@ -28,14 +28,36 @@
                                                 <span style="font-size: 12px;">{{ groupMembersLocal?.get(line.sendUserId)?.memberRemark }}</span>
                                             </div>
                                         </template>
-                                        <div :class="line.sendUserId === currentUserId ? 'item-right' : 'item-left'">
-                                            <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
+                                        <div class="item-left">
+                                            <template v-if="line.contentType === 1">
+                                                <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
+                                            </template>
+                                            <template v-if="line.contentType === 2">
+                                                <div class="bubble-triangle bubble-triangle-right"></div>
+                                                <AudioListener :audioPath="line.localStore" direct="left" 
+                                                    :contentLen="line.contentLen"
+                                                    class="item item-left-child" :style="calcMsgAudioLen(line.contentLen)" />
+
+                                            </template>
                                         </div>
                                     </template>
                                     <template v-if="line.sendUserId === currentUserId">
-                                        <div class='item-right'>
-                                            <div class="item item-right-child">{{line.content}}</div><div class="bubble-triangle bubble-triangle-left"></div>
-                                        </div>
+                                        <template v-if="line.contentType === 1">
+                                            <div class='item-right'>
+                                                <div class="item item-right-child">{{line.content}}</div><div class="bubble-triangle bubble-triangle-left"></div>
+                                            </div>
+                                        </template>
+                                        <template v-if="line.contentType === 2">
+                                            <div class="item-right">
+                                                <!-- <div class="item item-left-child">{{line.content}}</div> -->
+                                                
+                                                <AudioListener :audioPath="line.localStore" direct="right" 
+                                                    :contentLen="line.contentLen"
+                                                    class="item item-right-child" :style="calcMsgAudioLen(line.contentLen)" />
+                                                <div class="bubble-triangle bubble-triangle-left"></div>
+                                            </div>
+                                            <!-- <AudioListener /> -->
+                                        </template>
                                     </template>
                                 </div>
                             </el-scrollbar>
@@ -45,9 +67,16 @@
 
                 <el-footer >
                     <el-divider/>
-                    <el-input v-model="inputText" class="chat-input" :disabled="!delayShow" placeholder="请输入内容" type="textarea" resize="none" :autosize="{minRows:4, maxRows: 4}"/>
-                    <el-container style="justify-content: end;">
+                    <div style="display: flex; justify-content: start;">
+                        <el-icon :style="audioLoader ? 'color: red' : ''"><Microphone /></el-icon>
+                    </div>
+                    <div style="position: relative; margin-top: 5px;">
+
+                        <el-input v-model="inputText" class="chat-input" :disabled="!delayShow" placeholder="请输入内容" type="textarea" resize="none" :autosize="{minRows:4, maxRows: 4}"/>
+                    </div>
+                    <el-container style="justify-content: end;margin-top: 5px;">
                     
+                        <RecorderAudio/>
                         <el-button
                             key="success"
                             type="success"
@@ -75,7 +104,10 @@ import { GroupMemberVO } from '@/api/types/group'
 import { ElNotification, ScrollbarInstance } from 'element-plus'
 import { HashMap } from '@/util/common/HashMap'
 import { sendMsgToServer } from '@/api/msg'
-import { chatPanelScrollToBottom, etGroupInfoUpdate } from '@/constants/emitter_type'
+import { chatPanelScrollToBottom, etAudioStatus, etGroupInfoUpdate } from '@/constants/emitter_type'
+import RecorderAudio from '@/components/RecorderAudio.vue';
+import "@/css/loaders.css"
+import AudioListener from './AudioListener.vue'
 const msg_arr = ref([])
 const inputText: Ref<string> = ref('')
 const chatRecords: Ref<ChatRecord[]> = ref([])
@@ -88,6 +120,7 @@ const groupMembersLocal = ref<HashMap<number, GroupMember>>()
 const delayShow = ref(false)
 
 const scrollbarRef = ref<ScrollbarInstance>()
+const audioLoader = ref<boolean>(false);
 
 
 const host = window.location.host;
@@ -153,6 +186,7 @@ function upglide() {
             // 聊天记录的时间戳，往前查询固定条数
             window.electronApi.readRecord(startDateTime, size, search)
                 .then((records_text) => {
+                    console.log("all records:", records_text)
                     records_text.forEach((text, _) => {
                         if (text.dateTime != undefined) {
                             startDateTime = text.dateTime;
@@ -195,6 +229,9 @@ onMounted(() => {
     emitter.on(etGroupInfoUpdate, (val) => {
         groupMemebersToUpdate(val as number, currentUserId)
     })
+    emitter.on(etAudioStatus, (val) => {
+        audioLoader.value = val as boolean
+    })
 })
 
 
@@ -203,6 +240,7 @@ onUnmounted(() => {
     emitter.off(cleanMsgEventType)
     emitter.off(chatPanelScrollToBottom)
     emitter.off(etGroupInfoUpdate)
+    emitter.off(etAudioStatus)
 })
 
 function sendMsg() {
@@ -214,7 +252,7 @@ function sendMsg() {
     const record: ChatRecord = { chatType: chatType, saveType: "1", 
         sendUserId: currentUserId, receiveUserId: receiveUserId, 
         friendId: receiveUserId, content: inputText.value, 
-        dateTime: dateTime.getTime(), createdAt};
+        dateTime: dateTime.getTime(), createdAt, contentType: 1 };
     console.log(record)
     // send msg to server 
     // 这里自己发送的消息，为了在响应的时候拿到该数据的id，所以使用http请求，从返回值拿发送人的那条数据信息
@@ -222,7 +260,7 @@ function sendMsg() {
         .then(msgResp => {
             const msgWrap = msgResp.data
             // save to local db
-            window.electronApi.writeMsg({...msgWrap, selfId: currentUserId, friendId: receiveUserId, chatType})
+            window.electronApi.writeMsg({...msgWrap, dateTime: Number(msgWrap.dateTime), selfId: currentUserId, friendId: receiveUserId, chatType, contentType: 1})
             // record to add current chat window
             chatRecords.value.push(record)
             // clear msg window
@@ -301,6 +339,15 @@ const groupMemebersToUpdate = (groupId: number, thisUser: number) => {
                 groupMembersLocal.value = localMap
             }
         })
+}
+
+const calcMsgAudioLen = (contentLen: number | undefined) => {
+    const baseLen = 60;
+    if (!contentLen) {
+        return 'width:' + baseLen + 'px'
+    }
+    const len = Math.min(100, contentLen)
+    return 'width:' + (baseLen + len) + 'px';
 }
 
 </script>
@@ -391,7 +438,5 @@ const groupMemebersToUpdate = (groupId: number, thisUser: number) => {
   background: var(--el-color-primary-light-9);
   color: var(--el-color-primary);
 }
-
-
 
 </style>

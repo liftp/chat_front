@@ -24,6 +24,11 @@ const applyRecordUpdate = async (data) =>  {
 	await ipcRenderer.invoke('apply-record-update', data)
 }
 
+const applyRecordDelete = async (selfId) =>  {
+	await ipcRenderer.invoke('apply-record-delete', selfId)
+}
+
+
 const friendshipAdd = async (data) => {
 	await ipcRenderer.invoke('friendship-add', data)
 }
@@ -40,6 +45,12 @@ const findGroupMembers = async (groupId, selfId) => {
 const selectGroupWithMaxMsgId = async (selfId) => {
 	return await ipcRenderer.invoke('select-group-with-max-msg-id', selfId)
 }
+const localFileSave = async (path, buffer) => {
+	return await ipcRenderer.invoke('local-file-save', path, buffer)
+}
+const readLocalFileContent = async (path, buffer) => {
+	return await ipcRenderer.invoke('read-local-file-content', path, buffer)
+}
 
 
 
@@ -51,9 +62,12 @@ contextBridge.exposeInMainWorld('electronApi', {
 	applyRecordFind,
 	applyRecordAdd,
 	applyRecordUpdate,
+	applyRecordDelete,
 	friendshipAdd,
 	findGroupMembers,
 	saveGroupMembersLocal,
 	delMembersByGroupId,
 	selectGroupWithMaxMsgId,
+	localFileSave,
+	readLocalFileContent,
 })

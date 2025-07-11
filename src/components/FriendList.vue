@@ -111,7 +111,7 @@
                                     发送
                                 </el-button>
                                 
-                                <template v-if="scope.row.friendRelation" #reference>
+                                <template v-if="!scope.row.friendRelation" #reference>
                                     <el-button type="primary"
                                         size="small"
                                         @click="applyWindowShow = true"

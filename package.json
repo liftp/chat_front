@@ -36,8 +36,11 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@vitejs/plugin-vue": "^5.1.4",
     "axios": "^1.7.8",
+    "cross-env": "^7.0.3",
     "element-plus": "^2.8.5",
+    "http-proxy-middleware": "^3.0.5",
     "inversify": "^6.2.2",
     "inversify-binding-decorators": "^4.0.0",
     "js-cookie": "^3.0.5",
@@ -47,14 +50,11 @@
     "pinia": "^2.2.4",
     "reflect-metadata": "^0.2.2",
     "tslib": "^2.8.1",
-    "vue": "^3.5.10",
-    "vue-router": "^4.4.5",
-    "@vitejs/plugin-vue": "^5.1.4",
-    "cross-env": "^7.0.3",
-    "http-proxy-middleware": "^3.0.5",
     "typescript": "^5.5.3",
     "vite": "^5.4.8",
     "vite-plugin-electron": "^0.28.8",
+    "vue": "^3.5.10",
+    "vue-router": "^4.4.5",
     "vue-tsc": "^2.1.6"
   },
   "devDependencies": {
@@ -63,8 +63,7 @@
     "@types/lodash-es": "^4.17.12",
     "@types/nedb": "^1.8.16",
     "@types/node": "^22.7.9",
-    "electron": "^29.0.0",
-    "electron-builder": "^25.1.8"
+    "electron": "^29.0.0"
   },
   "main": "dist-electron/main.js"
 }

@@ -57,7 +57,7 @@
     </el-table> -->
 </template>
 <script lang="ts" setup>
-import { applyFriendConfirm, friendList } from '@/api/friend_list';
+import { applyFriendConfirm, applyRecord, friendList } from '@/api/friend_list';
 import { FriendQuery } from '@/api/types/friend_list';
 import { etFriendApply } from '@/constants/emitter_type';
 import { applyStatusShowDesc } from '@/constants/TypeEnum';

@@ -14,6 +14,9 @@ export interface ChatRecordDTO {
     selfId?: number, // 消息所属
     dateTime?: number, // 时间戳用于排序
     chatType: number, // 1:单聊 2:群聊
+    contentType: number, // 1: 文本 2：语音
+    localStore?: string, // 本地文件地址
+    contentLen?: number, // 内容长度 
 }
 
 // 群聊消息查询参数

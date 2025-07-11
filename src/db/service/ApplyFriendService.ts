@@ -33,9 +33,20 @@ export const saveRecord = (record: ApplyFriend) =>  {
     return true;
 };
 
-export const delRecord = (friendId: string, selfId: string) =>  {
+export const delRecord = (friendId: string, selfId: number) =>  {
     let num = 0;
     dbApplyRecord.remove({friendId, selfId}, (err, docsNum) => {
+        if (err != null) {
+            throw err;
+        }
+        num = docsNum;
+    });
+    return num;
+};
+
+export const delRecordBySelf = (selfId: number) =>  {
+    let num = 0;
+    dbApplyRecord.remove({selfId}, (err, docsNum) => {
         if (err != null) {
             throw err;
         }

@@ -64,7 +64,7 @@ const useUserStore = defineStore("user", () => {
     }
 
 
-    return {token: token.value, roles: roles.value, loginName:loginName.value, userId: userId.value, realname: realname.value, login, logout, resetToken, updateToken}
+    return {token: token, roles: roles, loginName:loginName, userId: userId, realname: realname, login, logout, resetToken, updateToken}
 })
 
 export function useUserStoreHook() {
@@ -81,7 +81,7 @@ const useCurrentChat = defineStore("currentChat", () => {
     const setChatType = (type: number) => {
         chatType.value = type
     }
-    return {chatUserId: chatUserId.value, chatType: chatType.value, choiceUserChat, setChatType}
+    return {chatUserId: chatUserId, chatType: chatType, choiceUserChat, setChatType}
 })
 export function useCurrentChatHook() {
     return useCurrentChat(store)

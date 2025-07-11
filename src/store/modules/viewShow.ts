@@ -16,7 +16,7 @@ const navSelectStore = defineStore("navSelect", () => {
     const friendApplySelect = (name: boolean) => {
         friendApply.value = name
     }
-    return {selectNav, navName: navName.value, mainSelect: mainSelect.value, mainWindowSelect, friendApplySelect, friendApply: friendApply.value}
+    return {selectNav, navName: navName, mainSelect: mainSelect, mainWindowSelect, friendApplySelect, friendApply: friendApply}
 })
 
 export function navSelectHook() {
