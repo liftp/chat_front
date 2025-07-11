@@ -64,10 +64,11 @@ const bitsPerSeconds = ref<number>(-1);
 const voiceActionStart = async () => {
 
     console.log("开始录制")
-    emitter.emit(etAudioStatus, true)
     navigator.mediaDevices
         .getUserMedia({audio: true})
         .then(stream => {
+            // 设备唤醒后触发麦克风图标高亮，第一次语音唤醒可能会比较慢
+            emitter.emit(etAudioStatus, true)
             
             mediaStream.value = stream;
             audioTrack.value = stream.getAudioTracks()[0];

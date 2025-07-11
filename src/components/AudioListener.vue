@@ -3,16 +3,16 @@
         <template v-if="direct === 'left'">
             <div style="display: flex;justify-content: start;">
                 <div class="triangle_audio_left"></div>
-                <div class="cricle_half_1_left shape_animation_2"></div>
-                <div class="circle_half_2_left shape_animation_3"></div>
+                <div class="cricle_half_1_left" :class="auidoPlaying ? 'shape_animation_2' : ''"></div>
+                <div class="circle_half_2_left" :class="auidoPlaying ? 'shape_animation_3' : ''"></div>
                 <div style="margin-left: 10px;">{{ contentLen }}''</div>
             </div>
         </template>
         <template v-if="direct === 'right'">
             <div style="display: flex;justify-content: end;">
                 <div style="margin-right: 10px;">{{ contentLen }}''</div>
-                <div class="circle_half_2 shape_animation_3"></div>
-                <div class="cricle_half_1 shape_animation_2"></div>
+                <div class="circle_half_2" :class="auidoPlaying ? 'shape_animation_3' : ''"></div>
+                <div class="cricle_half_1" :class="auidoPlaying ? 'shape_animation_2' : ''"></div>
                 <div class="triangle_audio"></div>
             </div>
         </template>
@@ -28,6 +28,7 @@ const props = withDefaults(defineProps<{audioPath?: string, direct: 'left' | 'ri
 })
 const srcUrl = ref<string>('')
 const audioRef = ref<HTMLAudioElement>()
+const auidoPlaying = ref<boolean>(false)
 
 const playAudio = async () => {
     // 从本地生成audio URL
@@ -41,7 +42,18 @@ const playAudio = async () => {
             .catch(err => {
                 console.log("语音读取异常", err)
             })
-        audioRef.value?.play()
+            if (audioRef.value) {     
+                audioRef.value.play()
+                audioRef.value.addEventListener('playing', (ev) => {
+                    // console.log("playing ....")
+                    auidoPlaying.value = true
+                })
+
+                audioRef.value.addEventListener('ended', (ev) => {
+                    // console.log("ended ....")
+                    auidoPlaying.value = false
+                })
+            }
     } else if (srcUrl.value != '' && props.audioPath) {
         // 调用播放
         audioRef.value?.play()
