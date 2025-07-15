@@ -12,11 +12,14 @@ import { recordList, updateRecord } from '../src/db/service/ApplyFriendService'
 import {saveRecord as saveApplyFriend, delRecordBySelf as deleteApplyFriend} from "../src/db/service/ApplyFriendService"
 import { ApplyFriend, ChatRecord, FriendRelationship, GroupMember } from '../src/db/model/models'
 import { localFileSave, readLocalFileContent } from '../src/service/file/FileSaveService'
+import squ from 'electron-squirrel-startup'
 // import('./preload/preload.mjs')
 const __filenameNew = fileURLToPath(import.meta.url)
 
 const __dirnameNew = path.dirname(__filenameNew)
 console.log(__dirnameNew)
+
+if (squ) app.quit();
 
 async function checkMediaAccess(mediaType: 'microphone' | 'camera'  ) {
   const result = systemPreferences.getMediaAccessStatus(mediaType)

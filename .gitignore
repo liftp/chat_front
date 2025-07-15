@@ -28,3 +28,4 @@ dist-electron/*.js
 *.db
 
 data/*
+out/*
