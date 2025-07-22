@@ -2,45 +2,19 @@
   "name": "chat_front",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev-i1": "cross-env PORT=3000 vite --mode development",
-    "dev-i2": "cross-env PORT=3001 vite --mode development",
-    "dev": "vite --mode development",
-    "build": "vue-tsc -b && vite build --mode prod",
-    "preview": "vite preview",
-    "electron:build": "npm run build && electron-builder --win",
-    "electron:server": "vite",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },
-  "build": {
-    "appId": "com.hch.chat_front",
-    "productName": "chat_front",
-    "directories": {
-      "output": "output"
-    },
-    "files": [
-      "dist/**/*",
-      "src/**/*"
-    ],
-    "win": {
-      "target": "nsis",
-      "icon": "icon.png"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowElevation": true,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
+  "author": {
+    "name": "hch",
+    "email": "1769412357@qq.com"
   },
-  "author": "hch",
   "license": "ISC",
   "description": "The simple chat front project",
   "dependencies": {
+    "@electron-forge/plugin-vite": "^7.8.1",
     "@element-plus/icons-vue": "^2.3.1",
     "@vitejs/plugin-vue": "^5.1.4",
     "axios": "^1.7.8",
@@ -69,39 +43,17 @@
     "@electron-forge/maker-rpm": "^7.8.1",
     "@electron-forge/maker-squirrel": "^7.8.1",
     "@electron-forge/maker-zip": "^7.8.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
+    "@electron-forge/plugin-fuses": "^7.8.1",
+    "@electron/fuses": "^1.8.0",
     "@types/inversify": "^2.0.33",
     "@types/js-cookie": "^3.0.6",
     "@types/lodash-es": "^4.17.12",
     "@types/nedb": "^1.8.16",
     "@types/node": "^22.7.9",
     "electron": "^29.0.0",
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "ts-node": "^10.9.2"
   },
-  "config": {
-    "forge": {
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "chat_front"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
-  },
-  "main": "dist-electron/main.js"
+  "main": ".vite/build/main.js"
 }

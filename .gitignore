@@ -29,3 +29,4 @@ dist-electron/*.js
 
 data/*
 out/*
+.vite/*
