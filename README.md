@@ -141,8 +141,7 @@
    #开发环境安装及运行
    npm install -i  # cnpm 可能会比较快一些
    npm install -i --save-dev
-   npm run build # 先打包electron的入口文件dist-electron/main.js, 后续就可以直接启动了
-   npm run dev-i1 # 本地开发环境实例启动
+   npm run start # 本地开发环境实例启动
    ```
 
 2. 打包
@@ -153,14 +152,11 @@
    # 在home路径下编辑.npmrc文件，内容为
    ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
    # 2.配置npm源为淘宝源
-   npm config set registry https://registry.npmmirror.com
+   npm config set registry https://registry.npmmirror.com/
    # 3.相关打包配置在package.json中，直接运行
    npm run make
    # 4.完成后项目中out下会产生解压缩目录，及out/make目录下的安装包，就是安装包，这里对应的是window开发环境
    ```
-
-   
-
 
 
 #### 5. 该项目不完善的地方
