@@ -18,9 +18,9 @@
                     <el-divider style="margin-top: 5px;"/>
                 </el-header>
                 <el-main>
-                    <div id="chatBox" ref="msg_arr" class="chat-msg-box" @scroll="scroll_msg_box">
+                    <div id="chatBox" ref="msg_arr" class="chat-msg-box" >
                         <template v-if="delayShow">
-                            <el-scrollbar ref="scrollbarRef" height="100%">
+                            <el-scrollbar ref="scrollbarRef" height="100%" @scroll="scroll_msg_box">
                                 <div  v-for="(line, index) in chatRecords"  :key="index" style="margin-top: 10px;">
                                     <template v-if="line.sendUserId !== currentUserId">
                                         <template v-if="friend.type === 2">
@@ -206,6 +206,7 @@ function upglide() {
 function scroll_msg_box() {
     let scrollTop = scrollbarRef.value?.wrapRef?.scrollTop;
     if (scrollTop === 0) {
+        console.log("scroll to top")
         // 加载数据
         upglide()
     }
