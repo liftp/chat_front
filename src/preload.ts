@@ -17,6 +17,9 @@ const writeMsg = async (msg: ChatRecord) => {
 const applyRecordFind = async (selfId: number) => {
 	return await ipcRenderer.invoke('apply-record-find', selfId)
 }
+const applyRecordLastUpdatedAt = async (selfId: number) => {
+	return await ipcRenderer.invoke('apply-record-last-updated-at', selfId)
+}
 const applyRecordAdd = async (data: ApplyFriend) => {
 	await ipcRenderer.invoke('apply-record-add', data)
 }
@@ -61,6 +64,7 @@ contextBridge.exposeInMainWorld('electronApi', {
 	findFriend,
 	writeMsg,
 	applyRecordFind,
+	applyRecordLastUpdatedAt,
 	applyRecordAdd,
 	applyRecordUpdate,
 	applyRecordDelete,

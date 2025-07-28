@@ -153,7 +153,7 @@ import ApplyFirendRecord from './ApplyFriendRecord.vue';
 import { addGroupChat } from '@/api/group';
 import { GroupInfoDTO, GroupInfoPartial } from '@/api/types/group';
 import emitter from '@/util/emitter';
-import { etAddFriendship } from '@/constants/emitter_type';
+import { etAddFriendship, etFriendApply } from '@/constants/emitter_type';
 
 
 const searchName = ref<string>('');
@@ -232,6 +232,15 @@ const searchUserFunc = debounce((query: UserQuery) => {
 const applyFriendFunc = (applyInfo: ApplyFriendDTO) => {
     applyWindowShow.value = false;
     applyFriend(applyInfo)
+        .then(res => {
+            const apply = res.data;
+            if (apply) {
+                window.electronApi.applyRecordAdd({...apply, selfId: useUserStoreHook().userId, applyPass: 0})
+                // 触发‘新的好友’列表更新
+                emitter.emit(etFriendApply)
+            }
+        })
+
 }
 onMounted(() => {
     // 从网络加载好友列表

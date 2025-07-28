@@ -47,6 +47,7 @@ export interface FriendRelationship {
 }
 
 export interface ApplyFriend {
+    id?: number,
     proposerId: number,
     proposerRemark: string,
     proposerName: string,
@@ -57,7 +58,7 @@ export interface ApplyFriend {
     applyPass: number, // 申请状态： 0:申请中 1:通过 2:拒绝
     applyPassDesc?: string,
     selfId: number,
-    updatedAt: number,
+    updateTime: number,
 }
 
 export interface GroupMember {

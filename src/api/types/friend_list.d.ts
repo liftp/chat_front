@@ -21,5 +21,5 @@ export interface FriendQuery {
 export type ApplyFriendDTO  = Partial<ApplyFriend>
 
 export type FriendListResp = ApiResponseData<FriendRelationship[]>
-export type FriendApplyResp = ApiResponseData<number>
+export type FriendApplyResp = ApiResponseData<ApplyFriend>
 export type FriendApplyRecordResp = ApiResponseData<ApplyFriend[]>

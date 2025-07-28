@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 import {findGroupMembersLocal, saveGroupMembersLocal, delMembersByGroupIdLocal} from '../src/db/service/GroupMemberService'
 import {readRecord, countRecord, saveRecord, selectGroupWithMaxMsgId} from '../src/db/service/ChatRecordService'
 import { findFriend, saveRecord as saveFriendship } from '../src/db/service/FriendListService'
-import { recordList, updateRecord } from '../src/db/service/ApplyFriendService'
+import { applyRecordLastUpdatedAt, recordList, updateRecord } from '../src/db/service/ApplyFriendService'
 import {saveRecord as saveApplyFriend, delRecordBySelf as deleteApplyFriend} from "../src/db/service/ApplyFriendService"
 import { ApplyFriend, ChatRecord, FriendRelationship, GroupMember } from '../src/db/model/models'
 import { localFileSave, readLocalFileContent } from '../src/service/file/FileSaveService'
@@ -118,7 +118,6 @@ function createWindow() {
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(() => {
 
-  // 语音录制权限
 
   ipcMain.handle('read-record', async (event, start, end, search) => {
     return await readRecord(start, end, search);
@@ -134,6 +133,9 @@ app.whenReady().then(() => {
   }) 
   ipcMain.handle('apply-record-find', async (event, selfId: number) => {
     return await recordList(selfId);
+  }) 
+  ipcMain.handle('apply-record-last-updated-at', async (event, selfId: number) => {
+    return await applyRecordLastUpdatedAt(selfId);
   })
   ipcMain.handle('apply-record-add', async (event, data: ApplyFriend) => {
     await saveApplyFriend(data);

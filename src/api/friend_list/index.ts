@@ -21,7 +21,7 @@ export function applyRecord(data?: number) {
     return request<FriendApplyRecordResp>({
         url: "applyFriend/applyRecord",
         method: 'post',
-        data
+        params: {updateLast: data}
     })
 }
 

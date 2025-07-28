@@ -15,15 +15,37 @@ export const recordList = (selfId: number) => {
     })
 }
 
+export const applyRecordLastUpdatedAt = (selfId: number) => {
+    return new Promise<ApplyFriend | undefined>((resolve, reject) => {
+        dbApplyRecord.find<ApplyFriend>({selfId})
+            .exec((err, docs) => {
+                if (err) {
+                    console.error("查询最后更新时间异常", err)
+                    reject(err)
+                }
+
+                let updatedAtLast: ApplyFriend | undefined = undefined;
+                docs.forEach(e => {
+                    if (!updatedAtLast || updatedAtLast.updateTime < e.updateTime) {
+                        updatedAtLast = e;
+                    }
+                })
+                resolve(updatedAtLast)
+            })
+    })
+}
+
+
 export const updateRecord = (record: ApplyFriend) => {
     dbApplyRecord.update(
         {selfId: record.selfId, proposerId: record.proposerId, targetUser: record.targetUser}, 
-        {$set: {applyPass: record.applyPass}}, {},
+        {$set: record}, {upsert: true},
         (err: Error | null, numberOfUpdated: number, affectedDocuments: any, upsert: boolean) => {
             if (err) {
-                console.log("更新申请状态异常：", err)
+                console.log("update apply error：", err)
             }
-            console.log("更新申请记录数量:", numberOfUpdated)
+            console.log("update apply size:", numberOfUpdated)
+            console.log("update apply is update ", upsert)
         }
     )
 }

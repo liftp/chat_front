@@ -21,7 +21,7 @@ export class FriendApplyResultMsgConsumer implements IMsgConsumer {
             applyPass: applyResult.applyStatus, targetUser: applyResult.targetUser, 
             proposerName: user.realname, selfId: user.userId
         } as ApplyFriend
-        window.electronApi.applyRecordAdd(applyUpdate)
+        window.electronApi.applyRecordUpdate(applyUpdate)
 
         // 触发好友申请记录刷新
         emitter.emit(etFriendApply, applyResult)

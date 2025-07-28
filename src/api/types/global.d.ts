@@ -7,6 +7,7 @@ export interface ElectronApi {
     findFriend: (name:string, selfId: number) => Promise<FriendList[]>;
     writeMsg: (msg: ChatRecord) => Promise<void>;
     applyRecordFind: (self: number) => Promise<ApplyFriend[]>;
+    applyRecordLastUpdatedAt: (self: number) => Promise<ApplyFriend | undefined>;
     applyRecordAdd: (data: ApplyFriend) => Promise<void>;
     applyRecordUpdate: (data: ApplyFriend) => Promise<void>;
     applyRecordDelete: (selfId: number) => Promise<void>;

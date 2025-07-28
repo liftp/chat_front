@@ -38,7 +38,7 @@
 
     
 
-    1.2 然后在electron/main.ts中添加whenReady事件，每个事件对应一个api
+    1.2 然后在src/main.ts中添加whenReady事件，每个事件对应一个api
 
     ```typescript
     import { app, BrowserWindow, ipcMain }  from 'electron'
@@ -54,7 +54,7 @@
 
     
 
-    1.3 在src/preload/index.mjs中利用ipcRenderer.invoke去接入前面定义的事件
+    1.3 在src/preload.ts中利用ipcRenderer.invoke去接入前面定义的事件
 
     ```typescript
     const {contextBridge, ipcRenderer } = require('electron');
@@ -96,7 +96,7 @@
 1. 由于聊天功能使用到了ws作为服务端消息推送，这里需要用拆开http请求和ws代理，http的代理就不再赘述，可以直接接入后端nginx网关，ws有点特殊，使用 proxyReqWs 事件作为requets header设置的回调，由于Websocket对象的创建不支持header的直接设置，所以将用户id放在了url上面，本来想在vite 代理这里解析url放到header上，然后rewrite路径，但是最后发rewrite操作会在proxyReqWs 事件 之前触发，所以rewrite直接放在了nginx网关上去调整路径了，这里就注释了,只是设置了header
 
    ```js
-   // vite.config.ts
+   // vite.renderer.config.ts
    import { type ConfigEnv, type UserConfigExport, loadEnv } from "vite"
    export default ({ mode }: ConfigEnv): UserConfigExport => {
        //..

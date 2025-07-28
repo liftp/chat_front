@@ -34,12 +34,14 @@
                             @click="receiveConfirm(apply)">
                             确定
                         </el-button>
-                        <template #reference>
+                        <template v-if="apply.targetUser === useUserStoreHook().userId" #reference>
                             <el-button type="primary" size="small">接受</el-button>
                         </template>
                         
                     </el-popover>
-                    <el-button type="primary"  size="small" @click="applyReject(apply)">拒绝</el-button>
+                    <template v-if="apply.targetUser === useUserStoreHook().userId">
+                        <el-button type="primary"  size="small" @click="applyReject(apply)">拒绝</el-button>
+                    </template>
                     
                 </span>
             </div>
@@ -73,17 +75,26 @@ const addRemark = ref<string>('');
 
 onMounted(() => {
     // 1.拉取远程最新的申请记录，存储到本地，主要是为了接收离线的时候产生的消息
-    // 加载申请记录
-    // applyRecord()
-    //     .then(records => {
-    //         applyRecords.value = records.data;
-    //     })
-    // 2.本地的数据进行展示
-    friendListFind()
+    // 查询本地申请记录的最后更新时间
+    window.electronApi.applyRecordLastUpdatedAt(useUserStoreHook().userId)
+        .then(res => {
+            // 加载申请记录
+            console.log("last updatedAt :", res)
+            applyRecord(!res ? undefined : res.updateTime)
+                .then(records => {
+                    // 写入拉取到的数据
+                    records.data.forEach(e => {
+                        window.electronApi.applyRecordUpdate({...e, selfId:useUserStoreHook().userId})
+                    });
+                    // 2.本地的数据进行展示
+                    friendListFind()
+                })
+        })
     // 好友申请触发器
     emitter.on(etFriendApply, (val) => {
         friendListFind()
     })
+    
 })
 
 function friendListFind() {
@@ -109,21 +120,33 @@ function receiveFriendApply() {
 }
 
 function receiveConfirm(apply: ApplyFriend) {
-    applyFriendConfirm({...apply, applyRemark: addRemark.value, applyPass: 1})
-    addRemark.value = ''
-    // 接收确认后，修改这条申请记录的状态为通过
-    window.electronApi.applyRecordUpdate({...apply, selfId: useUserStoreHook().userId, applyPass: 1})
-    // 刷新列表
-    friendListFind()
+    applyFriendConfirm({...apply, appliedRemark: addRemark.value, applyPass: 1})
+        .then(res => {
+            const confirm = res.data
+            if (confirm) {
+                addRemark.value = ''
+                // 接收确认后，修改这条申请记录的状态为通过
+                window.electronApi.applyRecordUpdate({...confirm, selfId: useUserStoreHook().userId, applyPass: 1})
+                // 刷新列表
+                friendListFind()
+            }
+        })
+    
     
 }
 
 function applyReject(apply: ApplyFriend) {
     applyFriendConfirm({...apply, applyPass: 2})
-    // 接收确认后，修改这条申请记录的状态为拒绝
-    window.electronApi.applyRecordUpdate({...apply, selfId: useUserStoreHook().userId, applyPass: 2})
-    // 刷新列表
-    friendListFind()
+        .then(res => {
+            const apply = res.data
+            if (apply) {
+                // 接收确认后，修改这条申请记录的状态为拒绝
+                window.electronApi.applyRecordUpdate({...apply, selfId: useUserStoreHook().userId, applyPass: 2})
+                // 刷新列表
+                friendListFind()
+            }
+                
+        })
 }
 
 </script>
