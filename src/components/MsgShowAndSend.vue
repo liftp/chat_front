@@ -69,8 +69,11 @@
                     <el-divider/>
                     <div style="display: flex; justify-content: start; align-items: center;">
                         <el-icon :style="audioLoader ? 'color: red' : ''"><Microphone /></el-icon>
-                        <el-tooltip content="语音通话" placement="top" v-if="friend.type !== 2">
-                            <el-icon style="cursor: pointer; margin-left: 12px;" @click="startVoiceCall"><Phone /></el-icon>
+                        <el-tooltip v-if="friend.type !== 2" content="语音通话" placement="top">
+                            <el-icon class="call-icon" @click="startCall('audio')"><Phone /></el-icon>
+                        </el-tooltip>
+                        <el-tooltip v-if="friend.type !== 2" content="视频通话" placement="top">
+                            <el-icon class="call-icon" @click="startCall('video')"><VideoCamera /></el-icon>
                         </el-tooltip>
                     </div>
                     <div style="position: relative; margin-top: 5px;">
@@ -247,8 +250,8 @@ onUnmounted(() => {
     emitter.off(etAudioStatus)
 })
 
-const startVoiceCall = () => {
-    emitter.emit(etCallStart, props.friend.friendId)
+const startCall = (media: 'audio' | 'video') => {
+    emitter.emit(etCallStart, { peerId: props.friend.friendId, media })
 }
 
 function sendMsg() {
@@ -361,6 +364,11 @@ const calcMsgAudioLen = (contentLen: number | undefined) => {
 </script>
 
 <style scoped>
+.call-icon {
+    cursor: pointer;
+    margin-left: 12px;
+}
+
 .chat-msg-box {
     /* height: 100%; */
     width: 100%;

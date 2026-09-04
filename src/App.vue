@@ -2,13 +2,13 @@
 // import HelloWorld from './components/HelloWorld.vue'
 // import Login from '@/views/Login.vue';
 import zhCn from 'element-plus/es/locale/lang/zh-cn';
-import VoiceCall from '@/components/VoiceCall.vue';
+import CallRoom from '@/components/CallRoom.vue';
 </script>
 
 <template>
   <el-config-provider :locale="zhCn">
     <router-view />
-    <VoiceCall />
+    <CallRoom />
   </el-config-provider>
 </template>
 
