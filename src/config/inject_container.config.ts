@@ -7,6 +7,7 @@ import { FriendApplyResultMsgConsumer } from "@/service/FriendApplyResultConsume
 import { FriendshipAddConsumer } from "@/service/FriendshipAddConsumer";
 import { GroupMemberAddConsumer } from "@/service/GroupMemberAddConsumer";
 import { GroupMemberToUpdateConsumer } from "@/service/GroupMemberToUpdateConsumer";
+import { VoiceSignalConsumer } from "@/service/VoiceSignalConsumer";
 
 export const container = new Container();
 
@@ -22,4 +23,6 @@ container.bind<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
     .to(GroupMemberAddConsumer).inSingletonScope()
 container.bind<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
     .to(GroupMemberToUpdateConsumer).inSingletonScope()
+container.bind<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
+    .to(VoiceSignalConsumer).inSingletonScope()
 // container.bind<IMsgConsumer[]>('IMsgConsumers').toService('IMsgConsumer')

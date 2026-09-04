@@ -29,7 +29,7 @@
                                             </div>
                                         </template>
                                         <div class="item-left">
-                                            <template v-if="line.contentType === 1">
+                                            <template v-if="line.contentType === 1 || line.contentType === 3">
                                                 <div class="bubble-triangle bubble-triangle-right"></div><div class="item item-left-child">{{line.content}}</div>
                                             </template>
                                             <template v-if="line.contentType === 2">
@@ -42,7 +42,7 @@
                                         </div>
                                     </template>
                                     <template v-if="line.sendUserId === currentUserId">
-                                        <template v-if="line.contentType === 1">
+                                        <template v-if="line.contentType === 1 || line.contentType === 3">
                                             <div class='item-right'>
                                                 <div class="item item-right-child">{{line.content}}</div><div class="bubble-triangle bubble-triangle-left"></div>
                                             </div>
@@ -67,8 +67,11 @@
 
                 <el-footer >
                     <el-divider/>
-                    <div style="display: flex; justify-content: start;">
+                    <div style="display: flex; justify-content: start; align-items: center;">
                         <el-icon :style="audioLoader ? 'color: red' : ''"><Microphone /></el-icon>
+                        <el-tooltip content="语音通话" placement="top" v-if="friend.type !== 2">
+                            <el-icon style="cursor: pointer; margin-left: 12px;" @click="startVoiceCall"><Phone /></el-icon>
+                        </el-tooltip>
                     </div>
                     <div style="position: relative; margin-top: 5px;">
 
@@ -104,7 +107,7 @@ import { GroupMemberVO } from '@/api/types/group'
 import { ElNotification, ScrollbarInstance } from 'element-plus'
 import { HashMap } from '@/util/common/HashMap'
 import { sendMsgToServer } from '@/api/msg'
-import { chatPanelScrollToBottom, etAudioStatus, etGroupInfoUpdate } from '@/constants/emitter_type'
+import { chatPanelScrollToBottom, etAudioStatus, etCallStart, etGroupInfoUpdate } from '@/constants/emitter_type'
 import RecorderAudio from '@/components/RecorderAudio.vue';
 import "@/css/loaders.css"
 import AudioListener from './AudioListener.vue'
@@ -243,6 +246,10 @@ onUnmounted(() => {
     emitter.off(etGroupInfoUpdate)
     emitter.off(etAudioStatus)
 })
+
+const startVoiceCall = () => {
+    emitter.emit(etCallStart, props.friend.friendId)
+}
 
 function sendMsg() {
     // write record in local 

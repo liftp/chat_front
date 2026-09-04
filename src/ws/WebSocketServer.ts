@@ -41,6 +41,8 @@ export const sendWsMsg = (msg: any) => {
     }
 }
 
+export const isWsOpen = () => !!wsObj && wsObj.readyState === WebSocket.OPEN
+
 const createWebSocket = () => {
     if (typeof (WebSocket) === 'undefined') {
         // writeToScreen("浏览器不支持WebSocket, 无法获取数据")
