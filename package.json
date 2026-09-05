@@ -5,8 +5,8 @@
   "scripts": {
     "start": "cross-env PORT=3000 electron-forge start",
     "start_2": "cross-env PORT=3001 electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make"
+    "package": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-forge package",
+    "make": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-forge make"
   },
   "author": {
     "name": "hch",
