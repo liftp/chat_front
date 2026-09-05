@@ -4,9 +4,10 @@ import path, { resolve } from "path"
 
 // https://vitejs.dev/config
 export default ({ mode }: ConfigEnv): UserConfigExport =>{
-    // const viteEnv = loadEnv(mode, process.cwd())
-    // const { VITE_PUBLIC_PATH } = viteEnv
-    // console.log("public path: ", VITE_PUBLIC_PATH)
+    // 代理目标与登录页「服务器地址」默认值同源：.env 的 VITE_SERVER_HOST
+    // （见 src/util/cache/server-config.ts；登录页配置后前端直连后端，此代理仅作为 host 为空时的回退通道）
+    const viteEnv = loadEnv(mode, process.cwd())
+    const serverHost = viteEnv.VITE_SERVER_HOST || '172.20.242.206'
     return {
         // base: VITE_PUBLIC_PATH,
         resolve: {
@@ -33,7 +34,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport =>{
             /** 接口代理 */
             proxy: {
               "/api/v1/ws/": {
-                target: "ws://172.23.5.25:8001/", // nginx的代理路径
+                target: `ws://${serverHost}:8001/`, // nginx的代理路径
                 ws: true,
                 /** 替换掉代理路径  */
                 // rewrite: path => path.replace(/^\/api\/v1\/ws\/\d+\//, '/'),
@@ -52,7 +53,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport =>{
                 }
               },
               "/api/v1/": {
-                target: "http://172.23.5.25:9001/",
+                target: `http://${serverHost}:9001/`,
                 ws: false,
                 /** 替换掉代理路径  */
                 rewrite: path => path.replace(/^\/api\/v1\//, ''),

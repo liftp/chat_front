@@ -4,6 +4,7 @@ interface ImportMetaEnv {
     readonly VITE_ROUTER_HISTORY: "hash" | "html5"
     readonly VITE_PUBLIC_PATH: string
     readonly VITE_WS_PATH: string
+    readonly VITE_SERVER_HOST: string
 }
 interface ImportMeta {
     readonly env: ImportMetaEnv

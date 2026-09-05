@@ -62,7 +62,9 @@ function createWindow() {
       nodeIntegration: true, //开启true这一步很重要,目的是为了vue文件中可以引入node和electron相关的API
       contextIsolation: true, // 可以使用require方法
       preload: path.join(__dirname, 'preload.js'),
-      sandbox: false
+      sandbox: false,
+      // 渲染进程需跨域直连登录页配置的后端服务器（后端 CORS 只放行 https://chat.front.com）
+      webSecurity: false,
     //   enableRemoteModule: true, // 可以使用remote方法
     }
   })

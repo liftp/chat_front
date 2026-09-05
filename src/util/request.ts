@@ -3,6 +3,7 @@ import { useUserStoreHook } from "@/store/modules/user"
 import { ElMessage } from "element-plus"
 import { get, merge } from "lodash-es"
 import { getToken, setToken } from "./cache/cookies"
+import { getHttpBase } from "./cache/server-config"
 
 import router from "@/router"
 
@@ -119,7 +120,8 @@ function createRequest(service: AxiosInstance) {
                 'Content-Type': 'application/json'
             },
             timeout: 5000,
-            baseURL: import.meta.env.VITE_BASE_API,
+            // 配置了服务器地址则直连后端（登录页可改），否则走 vite 代理的相对路径
+            baseURL: getHttpBase() || import.meta.env.VITE_BASE_API,
             data: {}
         }
         const mergeConfig = merge(defaultConfig, config)

@@ -89,10 +89,10 @@ import { ElNotification } from 'element-plus';
 import {  findGroupMemberById, groupMemebersAddApi } from '@/api/group';
 import { GroupMemberVO } from '@/api/types/group';
 import { fileDownload } from '@/api/fileupload';
+import { buildWsUrl } from '@/util/cache/server-config';
 
 var friendsLocal: Ref<FriendList[]> = ref([])
 const groupOperation = ref<string>();
-const host = window.location.host;
 const sendWsMsgEventType = "sendWsMsg"
 // 好友列表，用于添加到群聊的展示
 const friendsData = ref<FriendRelationship[]>();
@@ -108,7 +108,7 @@ const groupChatRecordShow = ref(false)
 onMounted(() => {
 	// ws连接
 	connectWebsocket(
-			`ws://${host}${import.meta.env.VITE_WS_PATH}${useUserStoreHook().userId}/chat?accessToken=${useUserStoreHook().token}`,
+			buildWsUrl(useUserStoreHook().userId, useUserStoreHook().token),
 			{msgType: 1},
 			(data: string) => {
 				console.log('返回的数据：', data)
