@@ -3,4 +3,9 @@ export interface LoginRequestData {
     password: string
 }
 
-export type LoginResponseData = ApiResponseData<string>
+export interface TokenPair {
+    accessToken: string,
+    refreshToken: string
+}
+
+export type LoginResponseData = ApiResponseData<TokenPair>

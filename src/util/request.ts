@@ -42,14 +42,20 @@ function createService() {
                 if (!config.retryCount || config.retryCount === 0) {
                     config.retryCount = 1
                     
-                    useUserStoreHook().updateToken(apiData.data as string)
-                    config.headers['token'] = useUserStoreHook().token
+                    useUserStoreHook().updateToken((apiData.data as { accessToken: string }).accessToken)
+                    config.headers['accessToken'] = useUserStoreHook().token
                     return service(config);
                 } else {
                     config.retryCount = 0;
                     logout()
                 }
                 return Promise.reject(new Error("token invalid"))
+            }
+
+            // accessToken/refreshToken invalid, force re-login
+            if (code === 505 || code === 506 || code === 511) {
+                logout()
+                return Promise.reject(new Error(apiData.remark || "login expired"))
             }
 
             return apiData;
@@ -104,10 +110,12 @@ function createRequest(service: AxiosInstance) {
     return function <T>(config: AxiosRequestConfig): Promise<T> {
         // const token = getToken()
         const token = useUserStoreHook().token
+        const refreshToken = useUserStoreHook().refreshToken
         // console.log("token:", token)
         const defaultConfig = {
             headers: {
-                token: token ? token : undefined,
+                accessToken: token ? token : undefined,
+                refreshToken: refreshToken ? refreshToken : undefined,
                 'Content-Type': 'application/json'
             },
             timeout: 5000,

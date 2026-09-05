@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import store from '@/store'
 import { defineStore } from "pinia";
-import { getToken, removeToken, setToken, setCookie } from "@/util/cache/cookies";
+import { getToken, removeToken, setToken, setCookie, getRefreshToken, setRefreshToken, removeRefreshToken } from "@/util/cache/cookies";
 import { type LoginRequestData } from "@/api/types/login";
 import { loginApi } from "@/api/login";
 import {getUserInfo} from "@/api/user_info"
@@ -11,6 +11,7 @@ import { ElMessage } from "element-plus";
 
 const useUserStore = defineStore("user", () => {
     const token = ref<string>(getToken() || "")
+    const refreshToken = ref<string>(getRefreshToken() || "")
     const roles = ref<string[]>([])
     const loginName = ref<string>("")
     const userId = ref<number>(-1)
@@ -20,8 +21,10 @@ const useUserStore = defineStore("user", () => {
         if (code === 202) {
 
             // console.log(data)
-            setToken(data)
-            token.value = data
+            setToken(data.accessToken)
+            token.value = data.accessToken
+            setRefreshToken(data.refreshToken)
+            refreshToken.value = data.refreshToken
             // 拉取用户信息，存入cookie
             const userRes: UserInfoResponse = await getUserInfo();
             const userInfo = userRes.data
@@ -31,6 +34,8 @@ const useUserStore = defineStore("user", () => {
             return true;
         } else if (code === 508) {
             ElMessage.error("用户不存在");
+        } else if (code === 509) {
+            ElMessage.error("密码错误");
         }
         return false;
 
@@ -42,7 +47,9 @@ const useUserStore = defineStore("user", () => {
 
     const logout = () => {
         removeToken()
+        removeRefreshToken()
         token.value = ""
+        refreshToken.value = ""
         userId.value = -1
         loginName.value = ""
         realname.value = ""
@@ -52,7 +59,9 @@ const useUserStore = defineStore("user", () => {
 
     const resetToken = () => {
         removeToken()
+        removeRefreshToken()
         token.value = ""
+        refreshToken.value = ""
         userId.value = -1
         loginName.value = ""
         realname.value = ""
@@ -61,10 +70,11 @@ const useUserStore = defineStore("user", () => {
 
     const updateToken = (tokenNew: string) => {
         token.value = tokenNew
+        setToken(tokenNew)
     }
 
 
-    return {token: token, roles: roles, loginName:loginName, userId: userId, realname: realname, login, logout, resetToken, updateToken}
+    return {token: token, refreshToken: refreshToken, roles: roles, loginName:loginName, userId: userId, realname: realname, login, logout, resetToken, updateToken}
 })
 
 export function useUserStoreHook() {

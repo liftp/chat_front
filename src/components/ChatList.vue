@@ -108,7 +108,7 @@ const groupChatRecordShow = ref(false)
 onMounted(() => {
 	// ws连接
 	connectWebsocket(
-			`ws://${host}${import.meta.env.VITE_WS_PATH}${useUserStoreHook().userId}/chat?token=${useUserStoreHook().token}`,
+			`ws://${host}${import.meta.env.VITE_WS_PATH}${useUserStoreHook().userId}/chat?accessToken=${useUserStoreHook().token}`,
 			{msgType: 1},
 			(data: string) => {
 				console.log('返回的数据：', data)
