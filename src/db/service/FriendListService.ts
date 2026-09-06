@@ -16,7 +16,9 @@ export const findFriend = (name: string, selfId: number) => {
 }
 
 export const saveRecord = (record: FriendList) =>  {
-    dbFreinds.insert(record);
+    // 按 friendId+selfId+type upsert：好友列表点击打开聊天等场景会重复同步同一好友，
+    // 盲插会产生重复会话记录
+    dbFreinds.update({friendId: record.friendId, selfId: record.selfId, type: record.type}, record, {upsert: true});
     return true;
 };
 

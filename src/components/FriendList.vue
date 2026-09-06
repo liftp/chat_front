@@ -144,10 +144,9 @@ import { ElNotification, scrollbarProps } from 'element-plus';
 import { debounce } from 'lodash-es'
 import { UserInfo, UserQuery } from '@/api/types/user_info';
 import { searchUser } from '@/api/user_info';
-import { useUserStoreHook } from '@/store/modules/user';
+import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user';
 import { ElTable, ElTableColumn } from 'element-plus';
 import { navSelectHook } from '@/store/modules/viewShow';
-import { MainMenu } from '@/constants/TypeEnum';
 import { showControl } from '@/util/menu_control/menu';
 import ApplyFirendRecord from './ApplyFriendRecord.vue';
 import { addGroupChat } from '@/api/group';
@@ -181,8 +180,21 @@ const applyWindowShow = ref(false);
 
 const selectFriend = debounce((friendId: number) => {
     selectFriendId.value = friendId
-    navSelectHook().mainWindowSelect(MainMenu.FRIEND_LIST.description || '')
-    navSelectHook().friendApplySelect(false)
+    // 点击好友直接打开聊天窗口：先把好友同步到本地缓存（消息页列表和聊天窗口的 friend 都依赖本地 NeDB），
+    // 再设置当前聊天对象并切到消息页
+    const friend = friendsData.value?.find(e => e.friendId === friendId)
+    if (friend) {
+        const friendship = {...friend, selfId: useUserStoreHook().userId, type: 1} as FriendRelationship
+        window.electronApi.friendshipAdd(friendship)
+        emitter.emit(etAddFriendship, friendship)
+    }
+    const chatHook = useCurrentChatHook()
+    if (friendId !== chatHook.chatUserId) {
+        emitter.emit("cleanMsg")
+    }
+    chatHook.setChatType(1)
+    chatHook.choiceUserChat(friendId)
+    navSelectHook().selectNav('chat')
 }, 300)
 
 const remoteSearch = (query: FriendQuery) => {

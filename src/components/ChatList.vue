@@ -135,7 +135,11 @@ onMounted(() => {
 		sendWsMsg(val) 
     })
 	emitter.on(etAddFriendship, (val) => {
-		friendsLocal.value.push(val as FriendList)
+		const friend = val as FriendList
+		// 去重：好友列表点击打开聊天、群聊创建等场景可能重复同步同一好友/群聊
+		if (!friendsLocal.value.some(e => e.friendId === friend.friendId && e.type === friend.type)) {
+			friendsLocal.value.push(friend)
+		}
 		// 更新好友列表，用于群聊添加
 		remoteSearch({name:'', searchType:1})
     })
@@ -166,7 +170,10 @@ onMounted(() => {
 				.then(freindList => {
 					freindList.forEach(friend => {
 						console.log(friend)
-						friendsLocal.value.push(friend)
+						// 去重：避免与 etAddFriendship 已同步的记录重复
+						if (!friendsLocal.value.some(e => e.friendId === friend.friendId && e.type === friend.type)) {
+							friendsLocal.value.push(friend)
+						}
 					})
 				})
 		})

@@ -10,35 +10,21 @@ const SERVER_HTTP_PORT = 9001
 const SERVER_WS_PORT = 8001
 
 /**
- * 默认服务器主机，与 vite.renderer.config.ts 的代理目标同源（.env 的 VITE_SERVER_HOST）。
- * 置空该环境变量可回退为「相对路径 + vite 代理」模式。
+ * 固定服务器主机地址：改 .env 的 VITE_SERVER_HOST（与 vite.renderer.config.ts 的代理目标同源），
+ * dev 下重启 dev server、打包后需重新 package/make 生效。置空该环境变量可回退为「相对路径 + vite 代理」模式。
  */
-const DEFAULT_SERVER_HOST = import.meta.env.VITE_SERVER_HOST ?? '172.20.242.206'
+const SERVER_HOST = import.meta.env.VITE_SERVER_HOST ?? '172.20.242.206'
 
-/**
- * 容错解析用户输入的主机地址：去掉粘贴进来的协议前缀、路径和端口，只留主机。
- * 如 "http://172.23.5.25:9001/" -> "172.23.5.25"
- */
-export const normalizeHost = (input: string): string =>
-    (input || '').trim()
-        .replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//, '')
-        .replace(/\/.*$/, '')
-        .replace(/:\d+$/, '')
+// 历史版本曾支持在登录页配置服务器地址（写入 localStorage），现已固定为 env 配置，
+// 清掉残留值，避免误以为其仍生效
+localStorage.removeItem(CacheKey.SERVER_HOST)
 
-/** 已配置的服务器主机，未配置（或配置为空）时取默认值 */
-export const getServerHost = (): string => {
-    const stored = normalizeHost(localStorage.getItem(CacheKey.SERVER_HOST) || '')
-    return stored || DEFAULT_SERVER_HOST
-}
+/** 固定服务器主机 */
+export const getServerHost = (): string => SERVER_HOST
 
-export const setServerHost = (host: string): void => {
-    localStorage.setItem(CacheKey.SERVER_HOST, normalizeHost(host))
-}
-
-/** HTTP 请求基地址，直连后端；主机为空时返回空串，由调用方回退到 vite 代理路径 */
+/** HTTP 请求基地址；主机为空时返回空串，由调用方回退到 vite 代理路径 */
 export const getHttpBase = (): string => {
-    const host = getServerHost()
-    return host ? `http://${host}:${SERVER_HTTP_PORT}/` : ''
+    return SERVER_HOST ? `http://${SERVER_HOST}:${SERVER_HTTP_PORT}/` : ''
 }
 
 /**
@@ -48,7 +34,6 @@ export const getHttpBase = (): string => {
  * 主机为空时回退为 window.location.host，经 vite 代理转发（dev，代理会补 X-User-Route 头）。
  */
 export const buildWsUrl = (userId: string | number, token: string): string => {
-    const host = getServerHost()
-    const authority = host ? `${host}:${SERVER_WS_PORT}` : window.location.host
+    const authority = `${SERVER_HOST}:${SERVER_WS_PORT}`
     return `ws://${authority}${import.meta.env.VITE_WS_PATH}${userId}/chat?accessToken=${token}`
 }
