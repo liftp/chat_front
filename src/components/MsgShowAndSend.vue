@@ -78,7 +78,7 @@
                     </div>
                     <div style="position: relative; margin-top: 5px;">
 
-                        <el-input v-model="inputText" class="chat-input" :disabled="!delayShow" placeholder="请输入内容" type="textarea" resize="none" :autosize="{minRows:4, maxRows: 4}"/>
+                        <el-input v-model="inputText" class="chat-input" :disabled="!delayShow" placeholder="请输入内容" type="textarea" resize="none" :autosize="{minRows:4, maxRows: 4}" @keydown="handleKeyDown"/>
                     </div>
                     <el-container style="justify-content: end;margin-top: 5px;">
                     
@@ -100,7 +100,7 @@
 </template>
 
 <script lang="ts" setup>
-import {watchEffect, ref, Ref, onUnmounted, onMounted, watch, computed} from 'vue'
+import {watchEffect, ref, Ref, onUnmounted, onMounted, watch, computed, nextTick} from 'vue'
 import { useCurrentChatHook, useUserStoreHook } from '@/store/modules/user'
 import emitter from '@/util/emitter'
 import { ChatRecord, ChatRecordSearch, FriendList, GroupMember } from '@/db/model/models'
@@ -252,6 +252,26 @@ onUnmounted(() => {
 
 const startCall = (media: 'audio' | 'video') => {
     emitter.emit(etCallStart, { peerId: props.friend.friendId, media })
+}
+
+function handleKeyDown(e: KeyboardEvent) {
+    if (e.key !== 'Enter') return
+    if (e.ctrlKey || e.metaKey) {
+        // Ctrl+Enter 换行
+        e.preventDefault()
+        const target = e.target as HTMLTextAreaElement
+        const start = target.selectionStart
+        const end = target.selectionEnd
+        inputText.value = inputText.value.substring(0, start) + '\n' + inputText.value.substring(end)
+        nextTick(() => {
+            target.focus()
+            target.selectionStart = target.selectionEnd = start + 1
+        })
+    } else if (!e.shiftKey && !e.altKey) {
+        // Enter 发送
+        e.preventDefault()
+        sendMsg()
+    }
 }
 
 function sendMsg() {
