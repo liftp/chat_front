@@ -27,7 +27,7 @@
             <el-card class="friend-info"
                     :class="friend.friendId === selectFriendId ? 'select_bgc' : ''"
                     @click="selectFriend(friend.friendId)">
-                <span class="online-dot" :class="friend.online ? 'online' : 'offline'"></span>
+                <span class="online-dot" :class="onlineStatus.isOnline(friend.friendId) ? 'online' : 'offline'"></span>
                 {{friend.friendRemark}}--({{friend.friendName}})
             </el-card>
         </div>
@@ -153,10 +153,12 @@ import ApplyFirendRecord from './ApplyFriendRecord.vue';
 import { addGroupChat } from '@/api/group';
 import { GroupInfoDTO, GroupInfoPartial } from '@/api/types/group';
 import emitter from '@/util/emitter';
-import { etAddFriendship, etFriendApply, etFriendOnlineStatus } from '@/constants/emitter_type';
+import { etAddFriendship, etFriendApply } from '@/constants/emitter_type';
+import { useOnlineStatusHook } from '@/store/modules/onlineStatus';
 
 
 const searchName = ref<string>('');
+const onlineStatus = useOnlineStatusHook()
 const friendsData = ref<FriendRelationship[]>();
 const selectFriendId = ref<number>(-1);
 // 添加聊天
@@ -202,6 +204,8 @@ const remoteSearch = (query: FriendQuery) => {
     friendList(query)
         .then(friends => {
             friendsData.value = friends.data;
+            // 填充在线状态 store（单一数据源）
+            onlineStatus.setBatch(friends.data || [])
             console.log(friends.data)
         })
         .catch(err => {
@@ -259,17 +263,6 @@ onMounted(() => {
     // 从网络加载好友列表
     const query: FriendQuery = {searchType: 1, name: ''}
     remoteSearch(query);
-    // 监听好友在线状态变更
-    emitter.on(etFriendOnlineStatus, (val: { userId: number, online: boolean }) => {
-        const friend = friendsData.value?.find(e => e.friendId === val.userId)
-        if (friend) {
-            friend.online = val.online
-        }
-    })
-})
-
-onUnmounted(() => {
-    emitter.off(etFriendOnlineStatus)
 })
 
 

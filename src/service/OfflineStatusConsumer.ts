@@ -3,6 +3,7 @@ import { injectable } from "inversify"
 import { IMsgConsumer } from "./IMsgConsumer"
 import emitter from '@/util/emitter';
 import { etFriendOnlineStatus } from '@/constants/emitter_type';
+import { useOnlineStatusHook } from '@/store/modules/onlineStatus';
 
 /**
  * 好友下线通知消费者 (msgType=3, DOWN_LINE)
@@ -14,6 +15,7 @@ export class OfflineStatusConsumer implements IMsgConsumer {
     msgConsume = (msg: string) => {
         const status = JSON.parse(msg) as { userId: number, username: string }
         console.log("好友下线通知", status)
+        useOnlineStatusHook().setStatus(status.userId, false)
         emitter.emit(etFriendOnlineStatus, { userId: status.userId, online: false })
     }
 }

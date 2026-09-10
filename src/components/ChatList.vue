@@ -29,7 +29,7 @@
 					</template>
 					<template v-if="friend.type !== 2">
 						<div>
-							<span class="online-dot" :class="friend.online ? 'online' : 'offline'"></span>
+							<span class="online-dot" :class="onlineStatus.isOnline(friend.friendId) ? 'online' : 'offline'"></span>
 							{{friend.friendRemark}}
 						</div>
 					</template>
@@ -83,7 +83,8 @@ import SERVICE_IDENTIFIES from '@/constants/identifiers';
 import { showControl } from '@/util/menu_control/menu';
 
 import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
-import { chatPanelScrollToBottom, etAddFriendship, etFriendOnlineStatus } from '@/constants/emitter_type';
+import { chatPanelScrollToBottom, etAddFriendship } from '@/constants/emitter_type';
+import { useOnlineStatusHook } from '@/store/modules/onlineStatus';
 import { FriendQuery, FriendRelationship } from '@/api/types/friend_list';
 import { friendList } from '@/api/friend_list';
 import { ElNotification } from 'element-plus';
@@ -92,6 +93,7 @@ import { GroupMemberVO } from '@/api/types/group';
 import { fileDownload } from '@/api/fileupload';
 import { buildWsUrl } from '@/util/cache/server-config';
 
+const onlineStatus = useOnlineStatusHook()
 var friendsLocal: Ref<FriendList[]> = ref([])
 const groupOperation = ref<string>();
 const sendWsMsgEventType = "sendWsMsg"
@@ -178,13 +180,6 @@ onMounted(() => {
 					})
 				})
 		})
-	// 监听好友在线状态变更
-	emitter.on(etFriendOnlineStatus, (val: { userId: number, online: boolean }) => {
-		const friend = friendsLocal.value.find(e => e.friendId === val.userId && e.type !== 2)
-		if (friend) {
-			friend.online = val.online
-		}
-	})
 	remoteSearch({name:'', searchType:1})
 	// 拉取群聊的所有未读消息
 	window.electronApi.selectGroupWithMaxMsgId(useUserStoreHook().userId)
@@ -218,6 +213,7 @@ const remoteSearch = (query: FriendQuery) => {
     friendList(query)
         .then(friends => {
             friendsData.value = friends.data;
+            onlineStatus.setBatch(friends.data || [])
             console.log(friends.data)
         })
         .catch(err => {
@@ -257,7 +253,6 @@ onUnmounted(() => {
     closeWebSocket()
 	// emitter off 
 	emitter.off(sendWsMsgEventType)
-	emitter.off(etFriendOnlineStatus)
 })
 
 
