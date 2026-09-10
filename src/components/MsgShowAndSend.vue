@@ -39,6 +39,14 @@
                                                     class="item item-left-child" :style="calcMsgAudioLen(line.contentLen)" />
 
                                             </template>
+                                            <template v-if="line.contentType === 4">
+                                                <div class="bubble-triangle bubble-triangle-right"></div>
+                                                <div class="item item-left-child file-card" @click="downloadFile(line)">
+                                                    <el-icon style="font-size:20px;margin-right:5px"><Document /></el-icon>
+                                                    <span class="file-name">{{parseFileName(line.content)}}</span>
+                                                    <span class="file-size">{{parseFileSize(line.content)}}</span>
+                                                </div>
+                                            </template>
                                         </div>
                                     </template>
                                     <template v-if="line.sendUserId === currentUserId">
@@ -58,6 +66,15 @@
                                             </div>
                                             <!-- <AudioListener /> -->
                                         </template>
+                                        <template v-if="line.contentType === 4">
+                                            <div class='item-right'>
+                                                <div class="item item-right-child file-card" @click="downloadFile(line)">
+                                                    <el-icon style="font-size:20px;margin-right:5px"><Document /></el-icon>
+                                                    <span class="file-name">{{parseFileName(line.content)}}</span>
+                                                    <span class="file-size">{{parseFileSize(line.content)}}</span>
+                                                </div><div class="bubble-triangle bubble-triangle-left"></div>
+                                            </div>
+                                        </template>
                                     </template>
                                 </div>
                             </el-scrollbar>
@@ -69,6 +86,11 @@
                     <el-divider/>
                     <div style="display: flex; justify-content: start; align-items: center;">
                         <el-icon :style="audioLoader ? 'color: red' : ''"><Microphone /></el-icon>
+                        <el-tooltip content="发送文件" placement="top">
+                            <el-icon class="call-icon" @click="triggerFilePick"><Paperclip /></el-icon>
+                        </el-tooltip>
+                        <input ref="fileInputRef" type="file" style="display:none" @change="handleFileChange"/>
+                        <span v-if="fileUploading" style="font-size:12px;color:#999;margin-left:4px">上传中...</span>
                         <el-tooltip v-if="friend.type !== 2" content="语音通话" placement="top">
                             <el-icon class="call-icon" @click="startCall('audio')"><Phone /></el-icon>
                         </el-tooltip>
@@ -110,6 +132,7 @@ import { GroupMemberVO } from '@/api/types/group'
 import { ElNotification, ScrollbarInstance } from 'element-plus'
 import { HashMap } from '@/util/common/HashMap'
 import { sendMsgToServer } from '@/api/msg'
+import { fileUpload, fileDownload } from '@/api/fileupload'
 import { chatPanelScrollToBottom, etAudioStatus, etCallStart, etGroupInfoUpdate } from '@/constants/emitter_type'
 import RecorderAudio from '@/components/RecorderAudio.vue';
 import "@/css/loaders.css"
@@ -127,6 +150,83 @@ const delayShow = ref(false)
 
 const scrollbarRef = ref<ScrollbarInstance>()
 const audioLoader = ref<boolean>(false);
+const fileInputRef = ref<HTMLInputElement>()
+const fileUploading = ref<boolean>(false)
+
+// 触发文件选择
+const triggerFilePick = () => {
+    fileInputRef.value?.click()
+}
+
+// 文件选择后上传并发送
+const handleFileChange = async (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (!file) return
+    fileUploading.value = true
+    try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const fileInfo = await fileUpload(formData)
+        const fileUrl = fileInfo.data
+        const fileMeta = JSON.stringify({url: fileUrl, fileName: file.name, fileSize: file.size})
+        // 发送消息
+        const receiveUserId = useCurrentChatHook().chatUserId
+        const chatType = useCurrentChatHook().chatType
+        const dateTime = new Date()
+        const record: ChatRecord = {
+            chatType, saveType: '1', sendUserId: currentUserId,
+            receiveUserId, friendId: receiveUserId,
+            content: fileMeta, dateTime: dateTime.getTime(),
+            createdAt: formatDate(dateTime), contentType: 4, contentLen: file.size
+        }
+        sendMsgToServer({...record, msgType: 2, groupId: chatType == 2 ? receiveUserId : -1, chatType})
+            .then(msgResp => {
+                const msgWrap = msgResp.data
+                window.electronApi.writeMsg({...msgWrap, dateTime: Number(msgWrap.dateTime),
+                    selfId: currentUserId, friendId: receiveUserId, chatType, contentType: 4, contentLen: file.size})
+                chatRecords.value.push(record)
+                setTimeout(scrollToBottom, 500)
+            })
+    } catch (err) {
+        console.log('文件发送失败', err)
+        ElNotification({ title: '提示', message: '文件发送失败' })
+    } finally {
+        fileUploading.value = false
+        target.value = '' // 重置 input 以便重复选择同一文件
+    }
+}
+
+// 解析文件名
+const parseFileName = (content: string) => {
+    try { return JSON.parse(content).fileName || '未知文件' } catch { return '未知文件' }
+}
+
+// 解析文件大小
+const parseFileSize = (content: string) => {
+    try {
+        const size = JSON.parse(content).fileSize || 0
+        if (size < 1024) return size + 'B'
+        if (size < 1024 * 1024) return (size / 1024).toFixed(1) + 'KB'
+        return (size / 1024 / 1024).toFixed(1) + 'MB'
+    } catch { return '' }
+}
+
+// 下载文件
+const downloadFile = async (line: ChatRecord) => {
+    try {
+        const meta = JSON.parse(line.content)
+        const fileKey = meta.url.substring(meta.url.indexOf('/chat') + '/chat'.length)
+        const blobData = await fileDownload(fileKey)
+        const blob = new Blob([blobData])
+        const fileName = meta.fileName || 'download'
+        await window.electronApi.localFileSave(fileName, await blob.arrayBuffer())
+        ElNotification({ title: '提示', message: '文件已保存' })
+    } catch (err) {
+        console.log('文件下载失败', err)
+        ElNotification({ title: '提示', message: '文件下载失败' })
+    }
+}
 
 
 const host = window.location.host;
@@ -463,6 +563,24 @@ const calcMsgAudioLen = (contentLen: number | undefined) => {
     left: -3px;
 }
 
+.file-card {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    min-width: 200px;
+    max-width: 300px;
+}
+.file-card .file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.file-card .file-size {
+    font-size: 12px;
+    color: #999;
+    margin-left: 8px;
+}
 .scrollbar-demo-item {
   display: flex;
   align-items: center;
