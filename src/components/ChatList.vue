@@ -29,6 +29,7 @@
 					</template>
 					<template v-if="friend.type !== 2">
 						<div>
+							<span class="online-dot" :class="friend.online ? 'online' : 'offline'"></span>
 							{{friend.friendRemark}}
 						</div>
 					</template>
@@ -82,7 +83,7 @@ import SERVICE_IDENTIFIES from '@/constants/identifiers';
 import { showControl } from '@/util/menu_control/menu';
 
 import MsgShowAndSend from '@/components/MsgShowAndSend.vue'
-import { chatPanelScrollToBottom, etAddFriendship } from '@/constants/emitter_type';
+import { chatPanelScrollToBottom, etAddFriendship, etFriendOnlineStatus } from '@/constants/emitter_type';
 import { FriendQuery, FriendRelationship } from '@/api/types/friend_list';
 import { friendList } from '@/api/friend_list';
 import { ElNotification } from 'element-plus';
@@ -177,6 +178,13 @@ onMounted(() => {
 					})
 				})
 		})
+	// 监听好友在线状态变更
+	emitter.on(etFriendOnlineStatus, (val: { userId: number, online: boolean }) => {
+		const friend = friendsLocal.value.find(e => e.friendId === val.userId && e.type !== 2)
+		if (friend) {
+			friend.online = val.online
+		}
+	})
 	remoteSearch({name:'', searchType:1})
 	// 拉取群聊的所有未读消息
 	window.electronApi.selectGroupWithMaxMsgId(useUserStoreHook().userId)
@@ -249,6 +257,7 @@ onUnmounted(() => {
     closeWebSocket()
 	// emitter off 
 	emitter.off(sendWsMsgEventType)
+	emitter.off(etFriendOnlineStatus)
 })
 
 
@@ -280,6 +289,20 @@ const groupMembersAdd = () => {
   .friend-info {
     text-align: left;
 	background-color: #fdfdfd;
+  }
+  .online-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+  .online-dot.online {
+    background-color: #67c23a;
+  }
+  .online-dot.offline {
+    background-color: #c0c0c0;
   }
   .margin_top {
 	margin-top: 5px;
