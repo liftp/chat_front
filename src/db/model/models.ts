@@ -44,6 +44,7 @@ export interface FriendRelationship {
     friendRemark: string,
     selfId: number,
     type: number,
+    online?: boolean, // 在线状态
 }
 
 export interface ApplyFriend {

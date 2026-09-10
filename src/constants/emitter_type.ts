@@ -6,5 +6,6 @@ const addMsgEventType = 'addMsgInLocal'
 const etAudioStatus = 'etAudioStatus'
 const etCallStart = 'etCallStart'
 const etCallSignal = 'etCallSignal'
+const etFriendOnlineStatus = 'etFriendOnlineStatus'
 
-export {etFriendApply, etAddFriendship, chatPanelScrollToBottom, etGroupInfoUpdate, addMsgEventType, etAudioStatus, etCallStart, etCallSignal}
+export {etFriendApply, etAddFriendship, chatPanelScrollToBottom, etGroupInfoUpdate, addMsgEventType, etAudioStatus, etCallStart, etCallSignal, etFriendOnlineStatus}

@@ -8,6 +8,8 @@ import { FriendshipAddConsumer } from "@/service/FriendshipAddConsumer";
 import { GroupMemberAddConsumer } from "@/service/GroupMemberAddConsumer";
 import { GroupMemberToUpdateConsumer } from "@/service/GroupMemberToUpdateConsumer";
 import { VoiceSignalConsumer } from "@/service/VoiceSignalConsumer";
+import { OnlineStatusConsumer } from "@/service/OnlineStatusConsumer";
+import { OfflineStatusConsumer } from "@/service/OfflineStatusConsumer";
 
 export const container = new Container();
 
@@ -25,4 +27,8 @@ container.bind<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
     .to(GroupMemberToUpdateConsumer).inSingletonScope()
 container.bind<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
     .to(VoiceSignalConsumer).inSingletonScope()
+container.bind<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
+    .to(OnlineStatusConsumer).inSingletonScope()
+container.bind<IMsgConsumer>(SERVICE_IDENTIFIES.IMSG_CONSUMER)
+    .to(OfflineStatusConsumer).inSingletonScope()
 // container.bind<IMsgConsumer[]>('IMsgConsumers').toService('IMsgConsumer')

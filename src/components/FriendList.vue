@@ -24,9 +24,10 @@
         </el-card>
         <!-- 搜索用户结果展示 -->
         <div v-for="friend in friendsData" :key="friend.id">
-            <el-card class="friend-info" 
+            <el-card class="friend-info"
                     :class="friend.friendId === selectFriendId ? 'select_bgc' : ''"
                     @click="selectFriend(friend.friendId)">
+                <span class="online-dot" :class="friend.online ? 'online' : 'offline'"></span>
                 {{friend.friendRemark}}--({{friend.friendName}})
             </el-card>
         </div>
@@ -152,7 +153,7 @@ import ApplyFirendRecord from './ApplyFriendRecord.vue';
 import { addGroupChat } from '@/api/group';
 import { GroupInfoDTO, GroupInfoPartial } from '@/api/types/group';
 import emitter from '@/util/emitter';
-import { etAddFriendship, etFriendApply } from '@/constants/emitter_type';
+import { etAddFriendship, etFriendApply, etFriendOnlineStatus } from '@/constants/emitter_type';
 
 
 const searchName = ref<string>('');
@@ -258,6 +259,17 @@ onMounted(() => {
     // 从网络加载好友列表
     const query: FriendQuery = {searchType: 1, name: ''}
     remoteSearch(query);
+    // 监听好友在线状态变更
+    emitter.on(etFriendOnlineStatus, (val: { userId: number, online: boolean }) => {
+        const friend = friendsData.value?.find(e => e.friendId === val.userId)
+        if (friend) {
+            friend.online = val.online
+        }
+    })
+})
+
+onUnmounted(() => {
+    emitter.off(etFriendOnlineStatus)
 })
 
 
@@ -269,7 +281,21 @@ onMounted(() => {
 }
 .friend-info {
     text-align: left;
-	background-color: #fdfdfd;
+        background-color: #fdfdfd;
+}
+.online-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+.online-dot.online {
+    background-color: #67c23a;
+}
+.online-dot.offline {
+    background-color: #c0c0c0;
 }
 .margin_top {
 	margin-top: 5px;
