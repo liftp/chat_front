@@ -16,6 +16,14 @@ export function searchUser(query: User.UserQuery) {
     })
 }
 
+export function updateUserApi(data: User.UpdateUserForm) {
+    return request<User.UpdateUserResponse>({
+        url: "user/updateUserInfo",
+        method: 'post',
+        data
+    })
+}
+
 export function addUserApi(data: User.UserAdd) {
     return request<User.UserAddResponse>({
         url: "user/insertUser",

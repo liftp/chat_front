@@ -13,7 +13,7 @@
 <template>
     <div class="common-layout" style="margin: 0px; padding: 0px;">
         <el-container>
-            <el-aside style="width: 26px; background-color: rgba(0, 0, 0, 0.08)">
+            <el-aside style="width: 60px; background-color: rgba(0, 0, 0, 0.08)">
                 <NavList />
             </el-aside>
             <template  :style="navSelectHook().navName === 'chat' ? 'display:flex' : 'display:none'" style="width: 100%;">

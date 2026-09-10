@@ -16,6 +16,7 @@ const useUserStore = defineStore("user", () => {
     const loginName = ref<string>("")
     const userId = ref<number>(-1)
     const realname = ref<string>("")
+    const avatar = ref<string>("")
     const login = async({username, password}: LoginRequestData): Promise<Boolean> => {
         const {data, code} = await loginApi({username, password})
         if (code === 202) {
@@ -30,6 +31,7 @@ const useUserStore = defineStore("user", () => {
             const userInfo = userRes.data
             userId.value = userInfo.id
             realname.value = userInfo.name
+            avatar.value = userInfo.avatar || ''
             loginName.value = username
             return true;
         } else if (code === 508) {
