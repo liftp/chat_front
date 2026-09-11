@@ -15,7 +15,6 @@
   "license": "ISC",
   "description": "The simple chat front project",
   "dependencies": {
-    "vue-cropper": "^1.1.10",
     "@electron-forge/plugin-vite": "^7.8.1",
     "@element-plus/icons-vue": "^2.3.1",
     "@vitejs/plugin-vue": "^5.1.4",
@@ -36,6 +35,7 @@
     "vite": "^5.4.8",
     "vite-plugin-electron": "^0.28.8",
     "vue": "^3.5.10",
+    "vue-cropper": "^1.1.1",
     "vue-router": "^4.4.5",
     "vue-tsc": "^2.1.6"
   },
