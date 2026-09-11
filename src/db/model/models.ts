@@ -35,7 +35,7 @@ export interface FriendList {
     // groupStatus: number, // 群状态： 0:开放 1:成员邀请加入 2:仅所属人拉取 3:密码进入
     selfId: number,
     online?: boolean, // 在线状态
-}}
+}
 
 // 好友数据
 export interface FriendRelationship {
